@@ -56,9 +56,13 @@ sudo chmod 755 /usr/local/bin/amk/setup_lan.sh && sudo chmod +x /usr/local/bin/a
 echo "Start Configuring WIFI settings..."
 
 ## Create the wifi directory if it doesn't exist
-sudo cp ./network/wifi/template/wifi-setting.sh /usr/local/bin/amk/wifi-setting.sh
+#sudo cp ./network/wifi/template/wifi-setting.sh /usr/local/bin/amk/wifi-setting.sh
+
+sudo cp ./network/wifi/beta/beta_wifi_setting.sh /usr/local/bin/amk/wifi-setting.sh
 sudo chmod 755 /usr/local/bin/amk/wifi-setting.sh && sudo chmod +x /usr/local/bin/amk/wifi-setting.sh
 
+
+# Auto start with profile
 sudo cp ./network/wifi/template/startup_wifi.sh /etc/profile.d/startup_wifi.sh
 sudo chmod 755 /etc/profile.d/startup_wifi.sh && sudo chmod +x /etc/profile.d/startup_wifi.sh
 

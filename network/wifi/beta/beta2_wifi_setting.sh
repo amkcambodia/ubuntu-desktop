@@ -1,6 +1,7 @@
 #!/bin/bash
 
 TARGET_SSID="AMKBr"
+USERNAME=$(whoami)
 IFACE=$(nmcli -t device status | grep ':wifi:' | cut -d: -f1)
 
 if [[ -z "$IFACE" ]]; then
@@ -8,19 +9,17 @@ if [[ -z "$IFACE" ]]; then
   exit 1
 fi
 
-CA_CERT="/etc/ssl/certs/amkcambodia-AMKDC02-CA.pem"
 CRED_FILE="/etc/smbcred/$USERNAME"
 
 if [[ ! -f "$CRED_FILE" ]]; then
-  echo "❌ Credential file not found at $CRED_FILE."
+  echo "❌ Credential file not found at $CRED_FILE"
   exit 1
 fi
 
-# shellcheck disable=SC1090
 source "$CRED_FILE"
 
 if [[ -z "$username" || -z "$password" ]]; then
-  echo "❌ Username or password not defined in $CRED_FILE."
+  echo "❌ Username or password not defined in $CRED_FILE"
   exit 1
 fi
 
@@ -30,37 +29,35 @@ else
   IDENTITY="$username"
 fi
 
-echo "🔍 Checking if connection profile exists for SSID: $TARGET_SSID..."
+PROFILE_NAME="${TARGET_SSID}-${USERNAME}"
 
-if nmcli connection show "$TARGET_SSID" &>/dev/null; then
-  echo "🔄 Modifying existing Wi-Fi connection: $TARGET_SSID"
-  nmcli connection modify "$TARGET_SSID" \
+echo "🔍 Checking if user Wi-Fi profile exists: $PROFILE_NAME"
+
+if nmcli --mode tabular --fields NAME connection show | grep -q "^$PROFILE_NAME"; then
+  echo "🔄 Modifying existing Wi-Fi profile: $PROFILE_NAME"
+  nmcli connection modify "$PROFILE_NAME" \
     wifi-sec.key-mgmt wpa-eap \
     802-1x.eap peap \
     802-1x.identity "$IDENTITY" \
     802-1x.password "$password" \
     802-1x.phase2-auth mschapv2 \
-    802-1x.ca-cert "$CA_CERT" \
     802-1x.system-ca-certs yes \
-    wifi-sec.group ccmp \
     connection.autoconnect yes
 else
-  echo "➕ Creating new Wi-Fi connection: $TARGET_SSID"
-  nmcli connection add type wifi ifname "$IFACE" con-name "$TARGET_SSID" ssid "$TARGET_SSID" \
+  echo "➕ Creating Wi-Fi profile: $PROFILE_NAME"
+  nmcli connection add type wifi ifname "$IFACE" con-name "$PROFILE_NAME" ssid "$TARGET_SSID" \
     wifi-sec.key-mgmt wpa-eap \
     802-1x.eap peap \
     802-1x.identity "$IDENTITY" \
     802-1x.password "$password" \
     802-1x.phase2-auth mschapv2 \
-    802-1x.ca-cert "$CA_CERT" \
     802-1x.system-ca-certs yes \
-    wifi-sec.group ccmp \
     connection.autoconnect yes
 fi
 
-echo "🔌 Reconnecting to $TARGET_SSID..."
+echo "🔌 Disconnecting and reconnecting with profile $PROFILE_NAME..."
 nmcli device disconnect "$IFACE"
 sleep 2
-nmcli device wifi connect "$TARGET_SSID" ifname "$IFACE"
+nmcli connection up "$PROFILE_NAME"
 
-echo "✅ Wi-Fi profile configured and connected to $TARGET_SSID."
+echo "✅ Connected as $IDENTITY using Wi-Fi profile $PROFILE_NAME"
