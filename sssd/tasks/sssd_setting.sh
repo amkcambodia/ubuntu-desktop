@@ -67,6 +67,16 @@ fi
 
 # ----------------------------------------------------------------------------------
 
+# Ensure simple_allow_group = ubunt-group exists
+if ! grep -q "^simple_allow_group *= *ubunt-group" "$SSSD_CONF"; then
+    echo "simple_allow_group = ubunt-group" | sudo tee -a "$SSSD_CONF" > /dev/null
+    echo "✅ Added: simple_allow_group = ubunt-group"
+else
+    echo "ℹ️ Already configured: simple_allow_group = ubunt-group"
+fi
+
+# ----------------------------------------------------------------------------------
+
 # Ensure correct permissions
 sudo chmod 600 "$SSSD_CONF"
 sudo chown root:root "$SSSD_CONF"

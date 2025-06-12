@@ -132,7 +132,7 @@ fi
 
 
 ./sssd/tasks/sssd_setting.sh
-./sssd/tasks/allow_restart_mount.sh
+#./sssd/tasks/allow_restart_mount.sh
 sudo systemctl daemon-reload
 
 # ----------------------------------------------------------------
