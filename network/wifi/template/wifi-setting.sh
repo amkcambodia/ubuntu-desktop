@@ -34,7 +34,8 @@ else
 fi
 
 echo "🔧 Configuring auto-connect to SSID: $TARGET_SSID"
-nmcli connection add type wifi ifname "$IFACE" con-name "$TARGET_SSID" ssid "$TARGET_SSID" \
+#nmcli connection add type wifi ifname "$IFACE" con-name "$TARGET_SSID" ssid "$TARGET_SSID" \
+nmcli connection modify "$TARGET_SSID" \
   wifi-sec.key-mgmt wpa-eap \
   802-1x.eap peap \
   802-1x.identity "$IDENTITY" \

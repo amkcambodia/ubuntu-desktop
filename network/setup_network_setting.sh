@@ -28,7 +28,8 @@ sudo mkdir -p /usr/local/bin/amk && sudo chmod 755 /usr/local/bin/amk
 # ----------------------------------------------------------------------------------
 
 ## Rename the LAN configuration script to setup_credentials.sh
-sudo ./network/lan/tasks/rename_lan.sh
+
+#sudo ./network/lan/tasks/rename_lan.sh
 
 #python3 ./network/lan/tasks/rename_network.py
 
