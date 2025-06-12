@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Exec=/bin/bash -c 'sudo /usr/local/bin/amk/mount-dfs.sh >> /tmp/mount-dfs.log 2>&1'
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name=Mount DFS Shares
+Comment=Automatically mount DFS shares at login

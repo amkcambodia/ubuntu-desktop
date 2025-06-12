@@ -1,0 +1,8 @@
+smbclient
+zenity
+adsys
+certmonger
+python3-cepces
+adcli
+cifs-utils
+libpam-mount
