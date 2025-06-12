@@ -1,7 +1,7 @@
 #!/bin/bash
 
 USERNAME=$(logname)
-CON_NAME="AMK-LAN"
+CON_NAME="Wired connection 1"
 CA_CERT="/etc/ssl/certs/amkcambodia-AMKDC02-CA.pem"
 # CRED_FILE="$HOME/.smbcred"
 CRED_FILE="/etc/smbcred/$USERNAME"
