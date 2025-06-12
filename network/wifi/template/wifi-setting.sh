@@ -8,17 +8,14 @@ if [[ -z "$IFACE" ]]; then
   exit 1
 fi
 
-USERNAME=(logname)
 CA_CERT="/etc/ssl/certs/amkcambodia-AMKDC02-CA.pem"
 CRED_FILE="/etc/smbcred/$USERNAME"
 
-# Check credentials file
 if [[ ! -f "$CRED_FILE" ]]; then
   echo "❌ Credential file not found."
   exit 1
 fi
 
-# Read credentials securely
 source "$CRED_FILE"
 
 if [[ -z "$username" || -z "$password" ]]; then
@@ -26,9 +23,8 @@ if [[ -z "$username" || -z "$password" ]]; then
   exit 1
 fi
 
-# Construct identity with domain if needed
 if [[ -n "$domain" ]]; then
-  IDENTITY="$domain\\$username"  # Use "\\" to escape backslash
+  IDENTITY="$domain\\$username"
 else
   IDENTITY="$username"
 fi
