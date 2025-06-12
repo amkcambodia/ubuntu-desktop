@@ -36,16 +36,17 @@ sudo ./network/lan/tasks/rename_lan.sh
 
 echo "Start Configuring LAN settings..."
 
-# Create the setup_lan.sh script in /etc/profile.d
-sudo cp ./network/lan/template/setup_lan.sh /etc/profile.d/setup_lan.sh
+# Create the beta_setup_lan.sh script in /etc/profile.d
+sudo cp ./network/lan/template/beta_setup_lan.sh /etc/profile.d/beta_setup_lan.sh
 sudo chmod 755 /etc/profile.d/setup_lan.sh && sudo chmod +x /etc/profile.d/setup_lan.sh
 
 # Copy the setup_lan.py script to /usr/local/bin/amk
 # sudo cp ./network/lan/template/setup_lan.py /usr/local/bin/amk/setup_lan.py
-# sudo chmod 755 /etc/profile.d/setup_lan.sh && sudo chmod +x /etc/profile.d/setup_lan.sh
+# sudo chmod 755 /etc/profile.d/beta_setup_lan.sh && sudo chmod +x /etc/profile.d/beta_setup_lan.sh
 # sudo chmod 755 /usr/local/bin/amk/setup_lan.py && chmod 755 /usr/local/bin/amk/setup_lan.py
 
-sudo cp ./network/lan/template/lan_config.sh /usr/local/bin/amk/setup_lan.sh
+#sudo cp ./network/lan/template/lan_config.sh /usr/local/bin/amk/setup_lan.sh
+sudo cp ./network/lan/beta/beta_setup_lan.sh /usr/local/bin/amk/setup_lan.sh
 sudo chmod 755 /usr/local/bin/amk/setup_lan.sh && sudo chmod +x /usr/local/bin/amk/setup_lan.sh
 
 # ----------------------------------------------------------------------------------

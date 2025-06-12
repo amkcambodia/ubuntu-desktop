@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CON_NAME="AMK-LAN"
+CON_NAME="Wired connection 1"
 IFACE=$(nmcli -t device status | grep ':ethernet:' | cut -d: -f1)
 
 if [[ -z "$IFACE" ]]; then
@@ -9,7 +9,7 @@ if [[ -z "$IFACE" ]]; then
 fi
 
 CA_CERT="/etc/ssl/certs/amkcambodia-AMKDC02-CA.pem"
-CRED_FILE="$HOME/.smbcred"
+CRED_FILE="/etc/smbcred/$USERNAME"
 
 if [[ ! -f "$CRED_FILE" ]]; then
   echo "❌ Credential file not found."
@@ -30,7 +30,8 @@ else
 fi
 
 echo "🔧 Configuring LAN: $CON_NAME"
-nmcli connection add type ethernet ifname "$IFACE" con-name "$CON_NAME" \
+#nmcli connection add type ethernet ifname "$IFACE" con-name "$CON_NAME" \
+nmcli connection "$CON_NAME" \
   802-1x.eap peap \
   802-1x.identity "$IDENTITY" \
   802-1x.password "$password" \
