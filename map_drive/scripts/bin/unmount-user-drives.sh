@@ -28,6 +28,16 @@ for MOUNTPOINT in "$COLLAB" "$DEPT" "$HOME"; do
 done
 
 echo "🧹 Cleaning up mount folders..."
-rm -rf "$COLLAB" "$DEPT" "$HOME"
+#rm -rf "$COLLAB" "$DEPT" "$HOME"
+
+for DIR in "$COLLAB" "$DEPT" "$HOME"; do
+    if ! mountpoint -q "$DIR"; then
+        echo "🧹 Removing $DIR ..."
+        rm -rf "$DIR"
+    else
+        echo "⚠️ Skipped deleting $DIR — still mounted!"
+    fi
+done
+
 
 exit 0
