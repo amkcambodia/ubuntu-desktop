@@ -156,9 +156,17 @@ class PasswordChanger(Gtk.Window):
 
     def on_switch_user(self, button):
         try:
-            subprocess.call(["gdmflexiserver"])
-        except Exception as e:
+            subprocess.run([
+                "gdbus", "call", "--session",
+                "--dest", "org.gnome.DisplayManager",
+                "--object-path", "/org/gnome/DisplayManager/LocalDisplayFactory",
+                "--method", "org.gnome.DisplayManager.LocalDisplayFactory.CreateTransientDisplay"
+            ], check=True)
+        except subprocess.CalledProcessError as e:
             self.show_error(f"Switch user failed: {e}")
+        except FileNotFoundError:
+            self.show_error("gdbus command not found.")
+
 
     def on_change_password(self, button):
         current = self.current_pass.get_text()
