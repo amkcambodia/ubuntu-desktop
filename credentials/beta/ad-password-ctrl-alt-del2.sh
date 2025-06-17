@@ -14,7 +14,7 @@ class PasswordChanger(Gtk.Window):
         self.fullscreen()
         self.connect("key-press-event", self.on_key_press)
 
-        # Set background color
+        # Set background color via CSS
         screen = Gdk.Screen.get_default()
         provider = Gtk.CssProvider()
         css = b"""
@@ -22,12 +22,12 @@ class PasswordChanger(Gtk.Window):
             background-color: #a53c6f;
         }
         entry {
-            font: 18px;
+            font-size: 18px;
             padding: 10px;
             min-height: 40px;
         }
         button {
-            font: 16px;
+            font-size: 16px;
             padding: 10px;
         }
         """
@@ -73,9 +73,12 @@ class PasswordChanger(Gtk.Window):
     def validate_policy(self, password):
         if len(password) < 8:
             return False
-        if not re.search(r"[A-Z]", password): return False
-        if not re.search(r"[a-z]", password): return False
-        if not re.search(r"[0-9]", password): return False
+        if not re.search(r"[A-Z]", password):
+            return False
+        if not re.search(r"[a-z]", password):
+            return False
+        if not re.search(r"[0-9]", password):
+            return False
         return True
 
     def on_change_password(self, button):
@@ -92,7 +95,9 @@ class PasswordChanger(Gtk.Window):
             return
 
         if not self.validate_policy(new):
-            self.show_error("Your password does not meet the policy:\nMinimum 8 characters, uppercase, lowercase, and number.")
+            self.show_error(
+                "Your password does not meet the policy:\nMinimum 8 characters, uppercase, lowercase, and number."
+            )
             return
 
         # Validate current password
@@ -137,7 +142,7 @@ class PasswordChanger(Gtk.Window):
             Gtk.main_quit()
 
 if __name__ == "__main__":
-    signal.signal(signal.SIGINT, signal.SIG_DFL)  # Allow Ctrl+C
+    signal.signal(signal.SIGINT, signal.SIG_DFL)  # Allow Ctrl+C to exit
     app = PasswordChanger()
     app.connect("destroy", Gtk.main_quit)
     app.show_all()
