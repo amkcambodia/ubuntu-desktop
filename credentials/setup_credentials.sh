@@ -62,6 +62,7 @@ command='/usr/local/bin/amk/change_password.sh'
 binding='<Control><Alt>Delete'
 
 
+
 sudo dconf update
 
 
