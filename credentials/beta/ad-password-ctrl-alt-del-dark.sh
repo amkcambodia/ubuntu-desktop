@@ -125,6 +125,17 @@ class PasswordChanger(Gtk.Window):
                 re.search(r"[A-Z]", password) and
                 re.search(r"[a-z]", password) and
                 re.search(r"[0-9]", password))
+    def on_lock_screen(self, button):
+        try:
+            subprocess.call(["gnome-screensaver-command", "-l"])
+        except Exception as e:
+            self.show_error(f"Lock screen failed: {e}")
+
+    def on_switch_user(self, button):
+        try:
+            subprocess.call(["dm-tool", "switch-to-greeter"])
+        except Exception as e:
+            self.show_error(f"Switch user failed: {e}")
 
     def on_change_password(self, button):
         current = self.current_pass.get_text()
