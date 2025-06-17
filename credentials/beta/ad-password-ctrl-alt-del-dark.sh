@@ -14,7 +14,7 @@ class PasswordChanger(Gtk.Window):
         self.fullscreen()
         self.connect("key-press-event", self.on_key_press)
 
-        # Dark Mode CSS Styling
+        # Apply dark mode and minimal shadow
         screen = Gdk.Screen.get_default()
         provider = Gtk.CssProvider()
         css = b"""
@@ -25,12 +25,12 @@ class PasswordChanger(Gtk.Window):
             color: #ffffff;
         }
         entry {
-            background-color: #444444;
+            background-color: #2a2a2a;
             color: #ffffff;
             font-size: 16px;
-            padding: 10px;
+            padding: 12px;
             border-radius: 6px;
-            border: 1px solid #666;
+            border: 1px solid #555;
         }
         button {
             background-image: none;
@@ -38,13 +38,13 @@ class PasswordChanger(Gtk.Window):
             color: #ffffff;
             font-size: 16px;
             padding: 12px 24px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 5px 2px rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
             border: none;
+            box-shadow: 0 1px 2px rgba(255, 255, 255, 0.1); /* Minimal shadow */
         }
         button:hover {
-            background-color: #555555;
-            box-shadow: 0px 0px 8px 3px rgba(255, 255, 255, 0.3);
+            background-color: #444444;
+            box-shadow: 0 1px 3px rgba(255, 255, 255, 0.2);
         }
         """
         provider.load_from_data(css)
