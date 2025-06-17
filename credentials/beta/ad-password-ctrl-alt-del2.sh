@@ -1,78 +1,119 @@
-#!/bin/bash
+#!/usr/bin/env python3
+import gi
+import subprocess
+import re
 
-USERNAME=$(logname)
-USER_REALM=$(realm list | awk '/realm-name/ { print $2 }')
-USER_PRINCIPAL="$USERNAME@$USER_REALM"
+sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-3.0 krb5-user
 
-# Custom function to show error messages
-show_error() {
-  yad --center --width=400 --image=dialog-error --window-icon=dialog-error \
-    --title="Change Password" \
-    --text="<span color='red'><b>$1</b></span>" \
-    --button="OK:0"
-}
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, Gdk
 
-# Custom function to show success messages
-show_success() {
-  yad --center --width=400 --image=dialog-information --window-icon=dialog-information \
-    --title="Change Password" \
-    --text="<span color='green'><b>$1</b></span>" \
-    --button="OK:0"
-}
+class PasswordChanger(Gtk.Window):
+    def __init__(self):
+        super().__init__(title="Change Password")
+        self.set_default_size(600, 400)
+        self.fullscreen()
+        self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#a53c6f"))
 
-# Function to display the main password change form
-form_password_input() {
-  RESULT=$(yad --form --center --width=420 --height=260 \
-    --title="Change Your Password" \
-    --image=dialog-password \
-    --text="<span font='12' foreground='white'>Please enter your password information below:</span>" \
-    --field="Enter current password:H" \
-    --field="Enter new password:H" \
-    --field="Confirm new password:H" \
-    --borders=20 \
-    --button="Change Password:0" --button="Cancel:1" \
-    --on-top \
-    --window-icon=dialog-password \
-    --color="#a53c6f")
+        self.username = subprocess.getoutput("logname")
+        self.realm = subprocess.getoutput("realm list | awk '/realm-name/ {print $2}'")
+        self.user_principal = f"{self.username}@{self.realm}"
 
-  if [ $? -ne 0 ]; then exit 1; fi
+        self.init_ui()
 
-  CURRENT_PASS=$(echo "$RESULT" | cut -d'|' -f1)
-  NEW_PASS=$(echo "$RESULT" | cut -d'|' -f2)
-  CONFIRM_PASS=$(echo "$RESULT" | cut -d'|' -f3)
-}
+    def init_ui(self):
+        grid = Gtk.Grid(row_spacing=10, column_spacing=10, margin=50)
+        grid.set_column_homogeneous(False)
+        grid.set_row_homogeneous(False)
+        grid.set_valign(Gtk.Align.CENTER)
+        grid.set_halign(Gtk.Align.CENTER)
 
-# Validate and attempt to change password
-validate_and_change_password() {
-  printf "%s\n" "$CURRENT_PASS" | kinit "$USER_PRINCIPAL" 2>/dev/null
-  if [ $? -ne 0 ]; then
-    show_error "Current password is incorrect. Please try again."
-    return 1
-  fi
+        self.current_pass = Gtk.Entry()
+        self.current_pass.set_placeholder_text("Enter your current password")
+        self.current_pass.set_visibility(False)
 
-  if [ "$NEW_PASS" != "$CONFIRM_PASS" ]; then
-    show_error "New password and confirmation do not match."
-    return 1
-  fi
+        self.new_pass = Gtk.Entry()
+        self.new_pass.set_placeholder_text("Enter your new password")
+        self.new_pass.set_visibility(False)
 
-  if [[ ${#NEW_PASS} -lt 8 ]] || ! [[ "$NEW_PASS" =~ [A-Z] ]] || ! [[ "$NEW_PASS" =~ [a-z] ]] || ! [[ "$NEW_PASS" =~ [0-9] ]]; then
-    show_error "Your password does not meet policy: at least 8 characters, including upper, lower, and digits."
-    return 1
-  fi
+        self.confirm_pass = Gtk.Entry()
+        self.confirm_pass.set_placeholder_text("Confirm your new password")
+        self.confirm_pass.set_visibility(False)
 
-  TMP_ERR=$(mktemp)
-  printf "%s\n%s\n%s\n" "$CURRENT_PASS" "$NEW_PASS" "$NEW_PASS" | kpasswd "$USER_PRINCIPAL" 2>"$TMP_ERR"
-  if [ $? -eq 0 ]; then
-    show_success "The password has changed successfully.\nPlease logout and login again to take effect."
-  else
-    show_error "Password change failed:\n$(cat "$TMP_ERR")"
-  fi
-  rm -f "$TMP_ERR"
-  kdestroy
-}
+        change_btn = Gtk.Button(label="Change Password")
+        change_btn.connect("clicked", self.on_change_password)
 
-# Main loop
-while true; do
-  form_password_input
-  validate_and_change_password && break
-done
+        grid.attach(self.current_pass, 0, 0, 1, 1)
+        grid.attach(self.new_pass, 0, 1, 1, 1)
+        grid.attach(self.confirm_pass, 0, 2, 1, 1)
+        grid.attach(change_btn, 0, 3, 1, 1)
+
+        self.add(grid)
+
+    def validate_policy(self, password):
+        if len(password) < 8:
+            return False
+        if not re.search(r"[A-Z]", password): return False
+        if not re.search(r"[a-z]", password): return False
+        if not re.search(r"[0-9]", password): return False
+        return True
+
+    def on_change_password(self, button):
+        current = self.current_pass.get_text()
+        new = self.new_pass.get_text()
+        confirm = self.confirm_pass.get_text()
+
+        if not current or not new or not confirm:
+            self.show_error("All fields are required.")
+            return
+
+        if new != confirm:
+            self.show_error("New password and confirmation do not match.")
+            return
+
+        if not self.validate_policy(new):
+            self.show_error("Your password does not meet the policy:\nMin 8 chars, uppercase, lowercase, and digit.")
+            return
+
+        # Validate current password
+        try:
+            subprocess.run(['kinit', self.user_principal], input=current.encode(), check=True, stderr=subprocess.PIPE)
+        except subprocess.CalledProcessError:
+            self.show_error("Current password incorrect.")
+            return
+
+        # Attempt to change password
+        try:
+            cmd = subprocess.Popen(['kpasswd', self.user_principal],
+                                   stdin=subprocess.PIPE,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+            input_str = f"{current}\n{new}\n{new}\n"
+            out, err = cmd.communicate(input=input_str.encode())
+
+            if cmd.returncode == 0:
+                self.show_info("The password has changed successfully.\nPlease logout and login again to take effect.")
+            else:
+                self.show_error(f"Failed to change password:\n{err.decode()}")
+        except Exception as e:
+            self.show_error(str(e))
+        finally:
+            subprocess.run(["kdestroy"])
+
+    def show_error(self, message):
+        dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK, "Error")
+        dialog.format_secondary_text(message)
+        dialog.run()
+        dialog.destroy()
+
+    def show_info(self, message):
+        dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, "Success")
+        dialog.format_secondary_text(message)
+        dialog.run()
+        dialog.destroy()
+
+if __name__ == "__main__":
+    app = PasswordChanger()
+    app.connect("destroy", Gtk.main_quit)
+    app.show_all()
+    Gtk.main()
