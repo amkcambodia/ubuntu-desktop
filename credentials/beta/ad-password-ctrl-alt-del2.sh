@@ -2,8 +2,7 @@
 import gi
 import subprocess
 import re
-
-sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-3.0 krb5-user
+import signal
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
@@ -13,7 +12,27 @@ class PasswordChanger(Gtk.Window):
         super().__init__(title="Change Password")
         self.set_default_size(600, 400)
         self.fullscreen()
-        self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("#a53c6f"))
+        self.connect("key-press-event", self.on_key_press)
+
+        # Set background color
+        screen = Gdk.Screen.get_default()
+        provider = Gtk.CssProvider()
+        css = b"""
+        window {
+            background-color: #a53c6f;
+        }
+        entry {
+            font: 18px;
+            padding: 10px;
+            min-height: 40px;
+        }
+        button {
+            font: 16px;
+            padding: 10px;
+        }
+        """
+        provider.load_from_data(css)
+        Gtk.StyleContext.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         self.username = subprocess.getoutput("logname")
         self.realm = subprocess.getoutput("realm list | awk '/realm-name/ {print $2}'")
@@ -22,23 +41,24 @@ class PasswordChanger(Gtk.Window):
         self.init_ui()
 
     def init_ui(self):
-        grid = Gtk.Grid(row_spacing=10, column_spacing=10, margin=50)
-        grid.set_column_homogeneous(False)
-        grid.set_row_homogeneous(False)
+        grid = Gtk.Grid(row_spacing=20, column_spacing=20, margin=100)
         grid.set_valign(Gtk.Align.CENTER)
         grid.set_halign(Gtk.Align.CENTER)
 
         self.current_pass = Gtk.Entry()
         self.current_pass.set_placeholder_text("Enter your current password")
         self.current_pass.set_visibility(False)
+        self.current_pass.set_width_chars(30)
 
         self.new_pass = Gtk.Entry()
         self.new_pass.set_placeholder_text("Enter your new password")
         self.new_pass.set_visibility(False)
+        self.new_pass.set_width_chars(30)
 
         self.confirm_pass = Gtk.Entry()
         self.confirm_pass.set_placeholder_text("Confirm your new password")
         self.confirm_pass.set_visibility(False)
+        self.confirm_pass.set_width_chars(30)
 
         change_btn = Gtk.Button(label="Change Password")
         change_btn.connect("clicked", self.on_change_password)
@@ -72,7 +92,7 @@ class PasswordChanger(Gtk.Window):
             return
 
         if not self.validate_policy(new):
-            self.show_error("Your password does not meet the policy:\nMin 8 chars, uppercase, lowercase, and digit.")
+            self.show_error("Your password does not meet the policy:\nMinimum 8 characters, uppercase, lowercase, and number.")
             return
 
         # Validate current password
@@ -112,7 +132,12 @@ class PasswordChanger(Gtk.Window):
         dialog.run()
         dialog.destroy()
 
+    def on_key_press(self, widget, event):
+        if event.keyval == Gdk.KEY_Escape:
+            Gtk.main_quit()
+
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, signal.SIG_DFL)  # Allow Ctrl+C
     app = PasswordChanger()
     app.connect("destroy", Gtk.main_quit)
     app.show_all()
