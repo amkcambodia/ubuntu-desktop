@@ -34,7 +34,7 @@ class PasswordChanger(Gtk.Window):
         }
         button {
             background-image: none;
-            background-color: #333333;
+            background-color: #1e1e1e;
             color: #ffffff;
             font-size: 16px;
             padding: 12px 24px;
