@@ -156,13 +156,18 @@ class PasswordChanger(Gtk.Window):
 
     def on_switch_user(self, button):
         try:
-            # Try dm-tool switch-to-greeter (works if LightDM or dm-tool is available)
-            result = subprocess.run(["dm-tool", "switch-to-greeter"], check=True)
-        except FileNotFoundError:
-            self.show_error("Switch user command 'dm-tool' not found.")
+            subprocess.run([
+                "gdbus", "call", "--session",
+                "--dest", "org.gnome.DisplayManager",
+                "--object-path", "/org/gnome/DisplayManager/LocalDisplayFactory",
+                "--method", "org.gnome.DisplayManager.LocalDisplayFactory.CreateTransientDisplay"
+            ], check=True)
         except subprocess.CalledProcessError as e:
-            self.show_error(f"Failed to switch user: {e}")
-
+            self.show_error(f"Switch user failed:\n{e}")
+        except FileNotFoundError:
+            self.show_error("gdbus command not found. Please install 'glib2.0-bin' package.")
+        except Exception as e:
+            self.show_error(f"Unexpected error: {e}")
 
     def on_change_password(self, button):
         current = self.current_pass.get_text()
