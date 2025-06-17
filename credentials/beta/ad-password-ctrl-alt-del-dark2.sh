@@ -75,8 +75,7 @@ class PasswordChanger(Gtk.Window):
         lock_btn = Gtk.Button(label="Lock Screen")
         lock_btn.connect("clicked", self.on_lock_screen)
 
-        switch_btn = Gtk.Button(label="Switch Users")
-        switch_btn.connect("clicked", self.on_switch_user)
+        # Removed Switch Users button and action
 
         change_btn = Gtk.Button(label="Change Password")
         change_btn.connect("clicked", self.init_change_ui)
@@ -89,10 +88,9 @@ class PasswordChanger(Gtk.Window):
         cancel_btn.connect("clicked", lambda x: Gtk.main_quit())
 
         grid.attach(lock_btn, 0, 0, 1, 1)
-        grid.attach(switch_btn, 0, 1, 1, 1)
-        grid.attach(change_btn, 0, 2, 1, 1)
-        grid.attach(logout_btn, 0, 3, 1, 1)
-        grid.attach(cancel_btn, 0, 4, 1, 1)
+        grid.attach(change_btn, 0, 1, 1, 1)  # shifted up
+        grid.attach(logout_btn, 0, 2, 1, 1)
+        grid.attach(cancel_btn, 0, 3, 1, 1)
 
         self.add(grid)
         self.show_all()
