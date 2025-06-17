@@ -40,10 +40,15 @@ sudo chmod 755 /usr/local/bin/amk/change_password.sh
 sudo chmod +x /usr/local/bin/amk/change_password.sh
 
 
-# Create the auto configure shortcut key
-sudo cp ./credentials/template/custom-shortcuts-ctrl-alt-del.sh /etc/profile.d/custom-shortcuts.sh
-sudo chmod 755 /etc/profile.d/custom-shortcuts.sh
-sudo chmod +x /etc/profile.d/custom-shortcuts.sh
+# Create the auto setup shortcut key
+sudo cp ./credentials/template/custom-shortcuts-ctrl-alt-del.sh /usr/lcoal/bin/amk/custom-shortcuts.sh
+sudo chmod 755 /usr/lcoal/bin/amk/custom-shortcuts.sh
+sudo chmod +x /usr/lcoal/bin/amk/custom-shortcuts.sh
+
+# Create the auto run shortcut key script
+sudo cp ./credentials/template/custom-shortcut.desktop /etc/xdg/autostart/custom-shortcut.desktop
+sudo chmod 755 /etc/xdg/autostart/custom-shortcut.desktop
+sudo chmod +x /etc/xdg/autostart/custom-shortcut.desktop
 
 
 

@@ -11,8 +11,8 @@ if [ -n "$DISPLAY" ] && command -v gsettings >/dev/null 2>&1; then
         gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$CUSTOM_KEYBIND_PATH']"
 
         # Set name, command, binding
-        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$CUSTOM_KEYBIND_PATH name 'AD Password Ctrl+Alt+Del'
-        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$CUSTOM_KEYBIND_PATH command '/usr/local/bin/ad-password-ctrl-alt-del-dark.sh'
+        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$CUSTOM_KEYBIND_PATH name 'AD Change Password'
+        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$CUSTOM_KEYBIND_PATH command '/usr/local/bin/amk/change_password.sh'
         gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$CUSTOM_KEYBIND_PATH binding '<Control><Alt>Delete'
     fi
 fi
