@@ -34,20 +34,25 @@ class PasswordChanger(Gtk.Window):
         }
         button {
             background-image: none;
+            background-color: #1e1e1e;
             color: #ffffff;
             font-size: 16px;
             padding: 12px 24px;
             border-radius: 8px;
             border: none;
             box-shadow: 0 1px 2px rgba(255, 255, 255, 0.1);
-        }
-        #btn-dark {
-            background-color: #1e1e1e;
-        }
-        #btn-cancel {
-            background-color: #333333;
+            margin: 5px;
         }
         button:hover {
+            background-color: #444444;
+            box-shadow: 0 1px 3px rgba(255, 255, 255, 0.2);
+        }
+        button.cancel {
+            background-color: #333333;
+            box-shadow: 0 1px 2px rgba(255, 255, 255, 0.1);
+        }
+        button.cancel:hover {
+            background-color: #555555;
             box-shadow: 0 1px 3px rgba(255, 255, 255, 0.2);
         }
         """
@@ -68,26 +73,22 @@ class PasswordChanger(Gtk.Window):
         grid.set_halign(Gtk.Align.CENTER)
 
         lock_btn = Gtk.Button(label="Lock Screen")
-        lock_btn.set_name("btn-dark")
         lock_btn.connect("clicked", self.on_lock_screen)
 
         switch_btn = Gtk.Button(label="Switch Users")
-        switch_btn.set_name("btn-dark")
         switch_btn.connect("clicked", self.on_switch_user)
 
-        change_btn = Gtk.Button(label="Change a Password")
-        change_btn.set_name("btn-dark")
+        change_btn = Gtk.Button(label="Change Password")
         change_btn.connect("clicked", self.init_change_ui)
 
-        logout_btn = Gtk.Button(label="Sign Out")
-        logout_btn.set_name("btn-dark")
+        logout_btn = Gtk.Button(label="Sign out")
         logout_btn.connect("clicked", self.on_logout)
 
         cancel_btn = Gtk.Button(label="Cancel")
-        cancel_btn.set_name("btn-cancel")
+        cancel_btn.get_style_context().add_class("cancel")
         cancel_btn.connect("clicked", lambda x: Gtk.main_quit())
 
-        grid.attach(lock_btn,   0, 0, 1, 1)
+        grid.attach(lock_btn, 0, 0, 1, 1)
         grid.attach(switch_btn, 0, 1, 1, 1)
         grid.attach(change_btn, 0, 2, 1, 1)
         grid.attach(logout_btn, 0, 3, 1, 1)
@@ -122,19 +123,17 @@ class PasswordChanger(Gtk.Window):
         self.confirm_pass.set_width_chars(30)
 
         change_btn = Gtk.Button(label="Change Password")
-        change_btn.set_name("btn-dark")
         change_btn.connect("clicked", self.on_change_password)
 
-        back_btn = Gtk.Button(label="Cancel")
-        back_btn.set_name("btn-cancel")
+        back_btn = Gtk.Button(label="Back")
         back_btn.connect("clicked", lambda x: self.init_home_ui())
 
         grid.attach(title,         0, 0, 2, 1)
         grid.attach(self.current_pass, 0, 1, 2, 1)
         grid.attach(self.new_pass,     0, 2, 2, 1)
         grid.attach(self.confirm_pass, 0, 3, 2, 1)
-        grid.attach(change_btn,        0, 4, 1, 1)
-        grid.attach(back_btn,          1, 4, 1, 1)
+        grid.attach(change_btn,    0, 4, 1, 1)
+        grid.attach(back_btn,      1, 4, 1, 1)
 
         self.add(grid)
         self.show_all()
@@ -148,6 +147,22 @@ class PasswordChanger(Gtk.Window):
                 re.search(r"[A-Z]", password) and
                 re.search(r"[a-z]", password) and
                 re.search(r"[0-9]", password))
+
+    def on_lock_screen(self, button):
+        try:
+            subprocess.call(["gnome-screensaver-command", "-l"])
+        except Exception as e:
+            self.show_error(f"Lock screen failed: {e}")
+
+    def on_switch_user(self, button):
+        try:
+            # Try dm-tool switch-to-greeter (works if LightDM or dm-tool is available)
+            result = subprocess.run(["dm-tool", "switch-to-greeter"], check=True)
+        except FileNotFoundError:
+            self.show_error("Switch user command 'dm-tool' not found.")
+        except subprocess.CalledProcessError as e:
+            self.show_error(f"Failed to switch user: {e}")
+
 
     def on_change_password(self, button):
         current = self.current_pass.get_text()
@@ -203,12 +218,6 @@ class PasswordChanger(Gtk.Window):
 
     def on_logout(self, button):
         subprocess.call(["gnome-session-quit", "--logout", "--no-prompt"])
-
-    def on_lock_screen(self, button):
-        subprocess.call(["gnome-screensaver-command", "-l"])
-
-    def on_switch_user(self, button):
-        subprocess.call(["dm-tool", "switch-to-greeter"])
 
     def on_key_press(self, widget, event):
         if event.keyval == Gdk.KEY_Escape:

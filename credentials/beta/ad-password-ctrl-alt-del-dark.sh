@@ -48,7 +48,7 @@ class PasswordChanger(Gtk.Window):
             box-shadow: 0 1px 3px rgba(255, 255, 255, 0.2);
         }
         button.cancel {
-            background-color: #333333;
+            background-color: #1e1e1e;
             box-shadow: 0 1px 2px rgba(255, 255, 255, 0.1);
         }
         button.cancel:hover {
@@ -147,26 +147,6 @@ class PasswordChanger(Gtk.Window):
                 re.search(r"[A-Z]", password) and
                 re.search(r"[a-z]", password) and
                 re.search(r"[0-9]", password))
-
-    def on_lock_screen(self, button):
-        try:
-            subprocess.call(["gnome-screensaver-command", "-l"])
-        except Exception as e:
-            self.show_error(f"Lock screen failed: {e}")
-
-    def on_switch_user(self, button):
-        try:
-            subprocess.run([
-                "gdbus", "call", "--session",
-                "--dest", "org.gnome.DisplayManager",
-                "--object-path", "/org/gnome/DisplayManager/LocalDisplayFactory",
-                "--method", "org.gnome.DisplayManager.LocalDisplayFactory.CreateTransientDisplay"
-            ], check=True)
-        except subprocess.CalledProcessError as e:
-            self.show_error(f"Switch user failed: {e}")
-        except FileNotFoundError:
-            self.show_error("gdbus command not found.")
-
 
     def on_change_password(self, button):
         current = self.current_pass.get_text()
