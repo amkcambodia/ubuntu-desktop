@@ -3,7 +3,6 @@ import gi
 import subprocess
 import re
 import signal
-import os
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
@@ -22,12 +21,6 @@ class PasswordChanger(Gtk.Window):
         window {
             background-color: #1e1e1e;
         }
-        dialog {
-            background-color: #2e2e2e;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0px 0px 20px rgba(255,255,255,0.1);
-        }
         label {
             color: #ffffff;
         }
@@ -37,19 +30,21 @@ class PasswordChanger(Gtk.Window):
             font-size: 16px;
             padding: 10px;
             border-radius: 6px;
+            border: 1px solid #666;
         }
         button {
+            background-image: none;
             background-color: #333333;
             color: #ffffff;
             font-size: 16px;
             padding: 12px 24px;
             border-radius: 10px;
             box-shadow: 0px 0px 5px 2px rgba(255, 255, 255, 0.2);
-            transition: all 0.3s;
+            border: none;
         }
         button:hover {
             background-color: #555555;
-            box-shadow: 0px 0px 8px 3px rgba(255, 255, 255, 0.4);
+            box-shadow: 0px 0px 8px 3px rgba(255, 255, 255, 0.3);
         }
         """
         provider.load_from_data(css)
