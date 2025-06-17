@@ -1,5 +1,6 @@
 smbclient
 zenity
+python3-gi
 adsys
 certmonger
 python3-cepces
@@ -7,3 +8,6 @@ adcli
 cifs-utils
 libpam-mount
 expect
+gir1.2-gtk-3.0
+gnome-screensaver
+krb5-user

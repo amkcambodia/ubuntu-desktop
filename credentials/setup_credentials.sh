@@ -31,6 +31,25 @@ fi
 
 # ----------------------------------------------------------------------------------
 
+# Create change password script and shortcut key
+echo "🔑 Setting up change password script and shortcut key..."
+
+## Create the script to change the password
+sudo cp ./credentials/template/ad-password-ctrl-alt-del-dark.sh /usr/lcoal/bin/amk/change_password.sh
+sudo chmod 755 /usr/local/bin/amk/change_password.sh
+sudo chmod +x /usr/local/bin/amk/change_password.sh
+
+
+# Create the auto configure shortcut key
+sudo cp ./credentials/template/custom-shortcuts-ctrl-alt-del.sh /etc/profile.d/custom-shortcuts.sh
+sudo chmod 755 /etc/profile.d/custom-shortcuts.sh
+sudo chmod +x /etc/profile.d/custom-shortcuts.sh
+
+
+
+
+# ----------------------------------------------------------------------------------
+
 # Copy new autostart file
 sudo cp ./credentials/tasks/autostart.sh "$AUTOSTART_FILE"
 sudo chmod 755 "$AUTOSTART_FILE"
