@@ -156,18 +156,23 @@ class PasswordChanger(Gtk.Window):
 
     def on_switch_user(self, button):
         try:
-            subprocess.run([
+            result = subprocess.run([
                 "gdbus", "call", "--session",
                 "--dest", "org.gnome.DisplayManager",
                 "--object-path", "/org/gnome/DisplayManager/LocalDisplayFactory",
                 "--method", "org.gnome.DisplayManager.LocalDisplayFactory.CreateTransientDisplay"
-            ], check=True)
+            ], capture_output=True, text=True, check=True)
+
+            if "true" not in result.stdout.lower() and "objectpath" not in result.stdout.lower():
+                # Unexpected output, likely failed
+                self.show_info("Unable to switch user automatically.\nPlease press Ctrl+Alt+F3 to switch user manually.")
         except subprocess.CalledProcessError as e:
-            self.show_error(f"Switch user failed:\n{e}")
+            self.show_error(f"Switch user command failed:\n{e.stderr}")
         except FileNotFoundError:
             self.show_error("gdbus command not found. Please install 'glib2.0-bin' package.")
         except Exception as e:
             self.show_error(f"Unexpected error: {e}")
+
 
     def on_change_password(self, button):
         current = self.current_pass.get_text()
