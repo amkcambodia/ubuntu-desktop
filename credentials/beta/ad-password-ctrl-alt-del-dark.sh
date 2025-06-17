@@ -25,7 +25,7 @@ class PasswordChanger(Gtk.Window):
             background-color: #2e2e2e;
             border-radius: 12px;
             padding: 20px;
-            box-shadow: 0px 0px 20px rgba(0,0,0,0.5);
+            box-shadow: 0px 0px 20px rgba(255,255,255,0.1);
         }
         label {
             color: #ffffff;
@@ -38,17 +38,20 @@ class PasswordChanger(Gtk.Window):
             border-radius: 6px;
         }
         button {
-            background-color: #3b82f6;
+            background-color: #333333;
             color: #ffffff;
             font-size: 16px;
             padding: 12px 24px;
-            border-radius: 8px;
-            transition: background 0.3s;
+            border-radius: 10px;
+            box-shadow: 0px 0px 5px 2px rgba(255, 255, 255, 0.2);
+            transition: all 0.3s;
         }
         button:hover {
-            background-color: #2563eb;
+            background-color: #555555;
+            box-shadow: 0px 0px 8px 3px rgba(255, 255, 255, 0.4);
         }
         """
+
         provider.load_from_data(css)
         Gtk.StyleContext.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
