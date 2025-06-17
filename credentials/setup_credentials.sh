@@ -40,15 +40,29 @@ sudo chmod 755 /usr/local/bin/amk/change_password.sh
 sudo chmod +x /usr/local/bin/amk/change_password.sh
 
 
-# Create the auto setup shortcut key
-sudo cp ./credentials/template/custom-shortcuts-ctrl-alt-del.sh /usr/lcoal/bin/amk/custom-shortcuts.sh
-sudo chmod 755 /usr/lcoal/bin/amk/custom-shortcuts.sh
-sudo chmod +x /usr/lcoal/bin/amk/custom-shortcuts.sh
+## Create the auto setup shortcut key
+#sudo cp ./credentials/template/custom-shortcuts-ctrl-alt-del.sh /usr/lcoal/bin/amk/custom-shortcuts.sh
+#sudo chmod 755 /usr/lcoal/bin/amk/custom-shortcuts.sh
+#sudo chmod +x /usr/lcoal/bin/amk/custom-shortcuts.sh
+#
+## Create the auto run shortcut key script
+#sudo cp ./credentials/template/custom-shortcut.desktop /etc/xdg/autostart/custom-shortcut.desktop
+#sudo chmod 755 /etc/xdg/autostart/custom-shortcut.desktop
+#sudo chmod +x /etc/xdg/autostart/custom-shortcut.desktop
 
-# Create the auto run shortcut key script
-sudo cp ./credentials/template/custom-shortcut.desktop /etc/xdg/autostart/custom-shortcut.desktop
-sudo chmod 755 /etc/xdg/autostart/custom-shortcut.desktop
-sudo chmod +x /etc/xdg/autostart/custom-shortcut.desktop
+sudo mkdir -p /etc/dconf/db/local.d
+sudo vi  /etc/dconf/db/local.d/00-custom-shortcuts
+
+[org/gnome/settings-daemon/plugins/media-keys]
+custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']
+
+[org/gnome/settings-daemon/plugins/media-keys/custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/]
+name='AD Change Password'
+command='/usr/local/bin/amk/change_password.sh'
+binding='<Control><Alt>Delete'
+
+
+sudo dconf update
 
 
 
