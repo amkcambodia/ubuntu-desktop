@@ -38,14 +38,15 @@ class PasswordChanger(Gtk.Window):
             border-radius: 6px;
         }
         button {
-            background-color: #007acc;
+            background-color: #3b82f6;
             color: #ffffff;
             font-size: 16px;
-            padding: 10px;
-            border-radius: 6px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            transition: background 0.3s;
         }
         button:hover {
-            background-color: #005f99;
+            background-color: #2563eb;
         }
         """
         provider.load_from_data(css)
@@ -58,22 +59,20 @@ class PasswordChanger(Gtk.Window):
         self.init_ui()
 
     def init_ui(self):
-        grid = Gtk.Grid(row_spacing=20, column_spacing=20)
+        grid = Gtk.Grid(row_spacing=20, column_spacing=40)
         grid.set_valign(Gtk.Align.CENTER)
         grid.set_halign(Gtk.Align.CENTER)
 
-        title = Gtk.Label(label="Change Your Password")
-        title.set_markup("<span size='xx-large'><b>Change Your Password</b></span>")
-
         change_button = Gtk.Button(label="Change Password")
+        change_button.set_size_request(200, 50)
         change_button.connect("clicked", self.on_change_clicked)
 
         logout_button = Gtk.Button(label="Logout")
+        logout_button.set_size_request(200, 50)
         logout_button.connect("clicked", lambda w: Gtk.main_quit())
 
-        grid.attach(title, 0, 0, 2, 1)
-        grid.attach(change_button, 0, 1, 1, 1)
-        grid.attach(logout_button, 1, 1, 1, 1)
+        grid.attach(change_button, 0, 0, 1, 1)
+        grid.attach(logout_button, 1, 0, 1, 1)
 
         self.add(grid)
 
@@ -93,7 +92,7 @@ class PasswordDialog(Gtk.Dialog):
         self.set_decorated(False)
         self.set_resizable(False)
         self.set_modal(True)
-        self.set_default_size(400, 300)
+        self.set_default_size(400, 400)
         self.user_principal = user_principal
 
         self.set_border_width(20)
@@ -101,6 +100,9 @@ class PasswordDialog(Gtk.Dialog):
         grid = Gtk.Grid(row_spacing=15, column_spacing=10)
         grid.set_valign(Gtk.Align.CENTER)
         grid.set_halign(Gtk.Align.CENTER)
+
+        title = Gtk.Label(label="Change Your Password")
+        title.set_markup("<span size='x-large'><b>Change Your Password</b></span>")
 
         self.current_pass = Gtk.Entry()
         self.current_pass.set_placeholder_text("Enter your current password")
@@ -120,10 +122,11 @@ class PasswordDialog(Gtk.Dialog):
         submit_button = Gtk.Button(label="Submit")
         submit_button.connect("clicked", self.on_submit)
 
-        grid.attach(self.current_pass, 0, 0, 1, 1)
-        grid.attach(self.new_pass, 0, 1, 1, 1)
-        grid.attach(self.confirm_pass, 0, 2, 1, 1)
-        grid.attach(submit_button, 0, 3, 1, 1)
+        grid.attach(title, 0, 0, 1, 1)
+        grid.attach(self.current_pass, 0, 1, 1, 1)
+        grid.attach(self.new_pass, 0, 2, 1, 1)
+        grid.attach(self.confirm_pass, 0, 3, 1, 1)
+        grid.attach(submit_button, 0, 4, 1, 1)
 
         box.add(grid)
         self.show_all()
