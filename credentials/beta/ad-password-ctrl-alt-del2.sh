@@ -19,7 +19,7 @@ class PasswordChanger(Gtk.Window):
         provider = Gtk.CssProvider()
         css = b"""
         window {
-            background-color: #a53c6f;
+            background-color: #D3D3D3;
         }
         entry {
             font-size: 18px;
