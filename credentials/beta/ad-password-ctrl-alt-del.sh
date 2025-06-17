@@ -1,77 +1,57 @@
 #!/bin/bash
 
-set -e
-
-# === 1. Create AD Password Change Script ===
-SCRIPT_PATH="/usr/local/bin/change-ad-password.sh"
-
-echo "Creating password change script at $SCRIPT_PATH..."
-sudo tee "$SCRIPT_PATH" > /dev/null << 'EOF'
-#!/bin/bash
-
+# Get the actual logged-in user (not root)
 USERNAME=$(logname)
+USER_REALM=$(realm list | grep -i realm-name | awk '{print $2}')
+USER_PRINCIPAL="$USERNAME@$USER_REALM"
 
-CURRENT_PASS=$(zenity --password --title="AD Password Change" --text="Enter your current password:")
-[ -z "$CURRENT_PASS" ] && exit 1
+sudo apt install krb5-user
+# Ensure script runs as the logged-in user
+# Prompt for current password
+CURRENT_PASS=$(zenity --password \
+    --title="AD Password Change" \
+    --text="Enter your current password:")
 
-NEW_PASS=$(zenity --password --title="AD Password Change" --text="Enter your new password:")
-[ -z "$NEW_PASS" ] && exit 1
+if [ -z "$CURRENT_PASS" ]; then
+    zenity --error --text="Current password is required."
+    exit 1
+fi
 
-CONFIRM_PASS=$(zenity --password --title="AD Password Change" --text="Confirm your new password:")
-[ "$NEW_PASS" != "$CONFIRM_PASS" ] && { zenity --error --text="Passwords do not match."; exit 1; }
+# Validate password with kinit
+echo "$CURRENT_PASS" | kinit "$USER_PRINCIPAL" 2>/dev/null
+if [ $? -ne 0 ]; then
+    zenity --error --title="Authentication Failed" \
+        --text="Current password is incorrect or domain not reachable."
+    exit 1
+fi
 
-echo -e "$CURRENT_PASS\n$NEW_PASS\n$NEW_PASS" | kpasswd "$USERNAME"
+# Prompt for new password
+NEW_PASS=$(zenity --password \
+    --title="New AD Password" \
+    --text="Enter your new password:")
 
+if [ -z "$NEW_PASS" ]; then
+    zenity --error --text="New password is required."
+    exit 1
+fi
+
+# Confirm new password
+CONFIRM_PASS=$(zenity --password \
+    --title="Confirm New Password" \
+    --text="Re-enter your new password:")
+
+if [ "$NEW_PASS" != "$CONFIRM_PASS" ]; then
+    zenity --error --text="New passwords do not match."
+    exit 1
+fi
+
+# Run kpasswd using the current Kerberos ticket
+echo -e "$CURRENT_PASS\n$NEW_PASS\n$NEW_PASS" | kpasswd "$USER_PRINCIPAL"
 if [ $? -eq 0 ]; then
     zenity --info --text="Password changed successfully."
 else
     zenity --error --text="Password change failed."
 fi
-EOF
 
-sudo chmod +x "$SCRIPT_PATH"
-
-# === 2. Create Desktop Launcher ===
-DESKTOP_ENTRY="/usr/share/applications/change-ad-password.desktop"
-echo "Creating desktop entry at $DESKTOP_ENTRY..."
-
-sudo tee "$DESKTOP_ENTRY" > /dev/null <<EOF
-[Desktop Entry]
-Name=Change AD Password
-Exec=$SCRIPT_PATH
-Icon=dialog-password
-Terminal=false
-Type=Application
-Categories=Utility;
-EOF
-
-# === 3. Configure dconf System-wide Shortcut ===
-DCONF_PATH="/etc/dconf/db/local.d"
-LOCKS_PATH="/etc/dconf/db/local.d/locks"
-
-echo "Setting up system-wide dconf keybinding..."
-
-sudo mkdir -p "$DCONF_PATH" "$LOCKS_PATH"
-
-sudo tee "$DCONF_PATH/00-custom-shortcuts" > /dev/null <<EOF
-[org/gnome/settings-daemon/plugins/media-keys]
-logout=''
-
-custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/change-ad-password/']
-
-[org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/change-ad-password]
-name='Change AD Password'
-command='$SCRIPT_PATH'
-binding='<Control><Alt>Delete'
-EOF
-
-# Optional: Lock the binding to prevent user override
-sudo tee "$LOCKS_PATH/custom-shortcuts" > /dev/null <<EOF
-/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/change-ad-password/binding
-EOF
-
-# Apply changes
-echo "Updating dconf database..."
-sudo dconf update
-
-echo "✅ Setup complete. Please reboot or re-login for changes to take effect."
+# Optional: destroy Kerberos ticket
+kdestroy
