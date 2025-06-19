@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import gi
-import subprocess
-import signal
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GLib
 
-gi.require_version('Gtk', '3.0')
+import subprocess
+import signal
+import sys
 
 
 class PasswordChanger(Gtk.Window):
@@ -187,7 +188,7 @@ class PasswordChanger(Gtk.Window):
             out, err = cmd.communicate(input=input_str.encode())
 
             if cmd.returncode == 0:
-                self.show_message("The password has changed successfully. Please logout and login again.", is_error=False)
+                self.show_message("Password changed successfully. Please logout and login again.", is_error=False)
             else:
                 ad_msg = err.decode().strip() or out.decode().strip()
                 self.show_message(f"Failed to change password:\n{ad_msg}", is_error=True)
@@ -211,6 +212,9 @@ class PasswordChanger(Gtk.Window):
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal.SIG_DFL)
+    if not Gtk.init_check()[0]:
+        print("Gtk cannot be initialized (probably not in a GUI session).")
+        sys.exit(1)
     app = PasswordChanger()
     app.connect("destroy", Gtk.main_quit)
     app.show_all()
