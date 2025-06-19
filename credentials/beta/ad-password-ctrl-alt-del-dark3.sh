@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 import gi
 import subprocess
-import re
 import signal
+from gi.repository import Gtk, Gdk, GLib
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
+
 
 class PasswordChanger(Gtk.Window):
     def __init__(self):
@@ -14,9 +14,15 @@ class PasswordChanger(Gtk.Window):
         self.fullscreen()
         self.connect("key-press-event", self.on_key_press)
 
-        # Apply dark mode and minimal shadow
-        screen = Gdk.Screen.get_default()
-        provider = Gtk.CssProvider()
+        self.apply_dark_theme()
+
+        self.username = subprocess.getoutput("logname")
+        self.realm = subprocess.getoutput("realm list | awk '/realm-name/ {print $2}'")
+        self.user_principal = f"{self.username}@{self.realm}"
+
+        self.init_home_ui()
+
+    def apply_dark_theme(self):
         css = b"""
         window {
             background-color: #1e1e1e;
@@ -55,41 +61,12 @@ class PasswordChanger(Gtk.Window):
             background-color: #555555;
             box-shadow: 0 1px 3px rgba(255, 255, 255, 0.2);
         }
-        dialog {
-            background-color: #1e1e1e;
-        }
-        dialog label, dialog * {
-            color: #ffffff;
-        }
-        """
-        provider.load_from_data(css)
-        Gtk.StyleContext.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-
-        self.username = subprocess.getoutput("logname")
-        self.realm = subprocess.getoutput("realm list | awk '/realm-name/ {print $2}'")
-        self.user_principal = f"{self.username}@{self.realm}"
-
-        self.init_home_ui()
-
-    def apply_dark_css(self, widget):
-        css = b"""
-        * {
-            background-color: #1e1e1e;
-            color: #ffffff;
-        }
         """
         provider = Gtk.CssProvider()
         provider.load_from_data(css)
-        context = widget.get_style_context()
-        context.add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-
-        # Apply also to internal content area (important!)
-        if isinstance(widget, Gtk.Dialog):
-            content_area = widget.get_content_area()
-            content_area.get_style_context().add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-            for child in content_area.get_children():
-                child.get_style_context().add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
 
     def init_home_ui(self):
         self.clear_window()
@@ -150,17 +127,24 @@ class PasswordChanger(Gtk.Window):
         back_btn = Gtk.Button(label="Back")
         back_btn.connect("clicked", lambda x: self.init_home_ui())
 
-        # Connect Enter key (activate) to change password on all password entries
+        self.message_label = Gtk.Label()
+        self.message_label.set_line_wrap(True)
+        self.message_label.set_max_width_chars(60)
+        self.message_label.set_halign(Gtk.Align.START)
+        self.message_label.set_valign(Gtk.Align.CENTER)
+        self.message_label.set_justify(Gtk.Justification.LEFT)
+
         self.current_pass.connect("activate", self.on_change_password)
         self.new_pass.connect("activate", self.on_change_password)
         self.confirm_pass.connect("activate", self.on_change_password)
 
-        grid.attach(title,         0, 0, 2, 1)
+        grid.attach(title, 0, 0, 2, 1)
         grid.attach(self.current_pass, 0, 1, 2, 1)
-        grid.attach(self.new_pass,     0, 2, 2, 1)
+        grid.attach(self.new_pass, 0, 2, 2, 1)
         grid.attach(self.confirm_pass, 0, 3, 2, 1)
-        grid.attach(change_btn,    0, 4, 1, 1)
-        grid.attach(back_btn,      1, 4, 1, 1)
+        grid.attach(change_btn, 0, 4, 1, 1)
+        grid.attach(back_btn, 1, 4, 1, 1)
+        grid.attach(self.message_label, 0, 5, 2, 1)
 
         self.add(grid)
         self.show_all()
@@ -173,7 +157,7 @@ class PasswordChanger(Gtk.Window):
         try:
             subprocess.call(["gnome-screensaver-command", "-l"])
         except Exception as e:
-            self.show_error(f"Lock screen failed: {e}")
+            self.show_message(f"Lock screen failed: {e}")
 
     def on_change_password(self, widget):
         current = self.current_pass.get_text()
@@ -181,17 +165,17 @@ class PasswordChanger(Gtk.Window):
         confirm = self.confirm_pass.get_text()
 
         if not current or not new or not confirm:
-            self.show_error("All fields are required.")
+            self.show_message("All fields are required.", is_error=True)
             return
 
         if new != confirm:
-            self.show_error("New password and confirmation do not match.")
+            self.show_message("New password and confirmation do not match.", is_error=True)
             return
 
         try:
             subprocess.run(['kinit', self.user_principal], input=current.encode(), check=True, stderr=subprocess.PIPE)
         except subprocess.CalledProcessError:
-            self.show_error("Current password incorrect.")
+            self.show_message("Current password incorrect.", is_error=True)
             return
 
         try:
@@ -203,28 +187,19 @@ class PasswordChanger(Gtk.Window):
             out, err = cmd.communicate(input=input_str.encode())
 
             if cmd.returncode == 0:
-                self.show_info("The password has changed successfully.\nPlease logout and login again to take effect.")
+                self.show_message("The password has changed successfully. Please logout and login again.", is_error=False)
             else:
                 ad_msg = err.decode().strip() or out.decode().strip()
-                self.show_error(f"Failed to change password:\n{ad_msg}")
+                self.show_message(f"Failed to change password:\n{ad_msg}", is_error=True)
         except Exception as e:
-            self.show_error(str(e))
+            self.show_message(str(e), is_error=True)
         finally:
             subprocess.run(["kdestroy"])
 
-    def show_error(self, message):
-        dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK, "Error")
-        self.apply_dark_css(dialog)
-        dialog.format_secondary_text(message)
-        dialog.run()
-        dialog.destroy()
-
-    def show_info(self, message):
-        dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, "Success")
-        self.apply_dark_css(dialog)
-        dialog.format_secondary_text(message)
-        dialog.run()
-        dialog.destroy()
+    def show_message(self, message, is_error=True):
+        color = "#ff6b6b" if is_error else "#8bc34a"
+        safe_text = GLib.markup_escape_text(message)
+        self.message_label.set_markup(f"<span foreground='{color}'>{safe_text}</span>")
 
     def on_logout(self, button):
         subprocess.call(["gnome-session-quit", "--logout", "--no-prompt"])
@@ -232,6 +207,7 @@ class PasswordChanger(Gtk.Window):
     def on_key_press(self, widget, event):
         if event.keyval == Gdk.KEY_Escape:
             Gtk.main_quit()
+
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal.SIG_DFL)
