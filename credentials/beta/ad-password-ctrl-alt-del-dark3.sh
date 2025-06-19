@@ -55,13 +55,12 @@ class PasswordChanger(Gtk.Window):
             background-color: #555555;
             box-shadow: 0 1px 3px rgba(255, 255, 255, 0.2);
         }
-#        /* Dialog background and text color */
-#        dialog {
-#            background-color: #1e1e1e;
-#        }
-#        dialog label, dialog * {
-#            color: #ffffff;
-#        }
+        dialog {
+            background-color: #1e1e1e;
+        }
+        dialog label, dialog * {
+            color: #ffffff;
+        }
         """
         provider.load_from_data(css)
         Gtk.StyleContext.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
@@ -72,6 +71,24 @@ class PasswordChanger(Gtk.Window):
 
         self.init_home_ui()
 
+    def apply_dark_css(self, widget):
+        # Apply the same dark CSS to dialogs/windows
+        screen = Gdk.Screen.get_default()
+        provider = Gtk.CssProvider()
+        css = b"""
+        window, dialog {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+        label, entry, button {
+            color: #ffffff;
+            background-color: #2a2a2a;
+        }
+        """
+        provider.load_from_data(css)
+        Gtk.StyleContext.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        widget.get_style_context().add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
     def init_home_ui(self):
         self.clear_window()
 
@@ -81,8 +98,6 @@ class PasswordChanger(Gtk.Window):
 
         lock_btn = Gtk.Button(label="Lock Screen")
         lock_btn.connect("clicked", self.on_lock_screen)
-
-        # Removed Switch Users button and action
 
         change_btn = Gtk.Button(label="Change Password")
         change_btn.connect("clicked", self.init_change_ui)
@@ -95,7 +110,7 @@ class PasswordChanger(Gtk.Window):
         cancel_btn.connect("clicked", lambda x: Gtk.main_quit())
 
         grid.attach(lock_btn, 0, 0, 1, 1)
-        grid.attach(change_btn, 0, 1, 1, 1)  # shifted up
+        grid.attach(change_btn, 0, 1, 1, 1)
         grid.attach(logout_btn, 0, 2, 1, 1)
         grid.attach(cancel_btn, 0, 3, 1, 1)
 
@@ -133,6 +148,11 @@ class PasswordChanger(Gtk.Window):
         back_btn = Gtk.Button(label="Back")
         back_btn.connect("clicked", lambda x: self.init_home_ui())
 
+        # Connect Enter key (activate) to change password on all password entries
+        self.current_pass.connect("activate", self.on_change_password)
+        self.new_pass.connect("activate", self.on_change_password)
+        self.confirm_pass.connect("activate", self.on_change_password)
+
         grid.attach(title,         0, 0, 2, 1)
         grid.attach(self.current_pass, 0, 1, 2, 1)
         grid.attach(self.new_pass,     0, 2, 2, 1)
@@ -147,19 +167,13 @@ class PasswordChanger(Gtk.Window):
         for child in self.get_children():
             self.remove(child)
 
-#    def validate_policy(self, password):
-#        return (len(password) >= 8 and
-#                re.search(r"[A-Z]", password) and
-#                re.search(r"[a-z]", password) and
-#                re.search(r"[0-9]", password))
-
     def on_lock_screen(self, button):
         try:
             subprocess.call(["gnome-screensaver-command", "-l"])
         except Exception as e:
             self.show_error(f"Lock screen failed: {e}")
 
-    def on_change_password(self, button):
+    def on_change_password(self, widget):
         current = self.current_pass.get_text()
         new = self.new_pass.get_text()
         confirm = self.confirm_pass.get_text()
@@ -171,10 +185,6 @@ class PasswordChanger(Gtk.Window):
         if new != confirm:
             self.show_error("New password and confirmation do not match.")
             return
-
-#        if not self.validate_policy(new):
-#            self.show_error("Your password does not meet the policy:\nMinimum 8 characters, including uppercase, lowercase, and number.")
-#            return
 
         try:
             subprocess.run(['kinit', self.user_principal], input=current.encode(), check=True, stderr=subprocess.PIPE)
@@ -192,8 +202,6 @@ class PasswordChanger(Gtk.Window):
 
             if cmd.returncode == 0:
                 self.show_info("The password has changed successfully.\nPlease logout and login again to take effect.")
-#            else:
-#                self.show_error(f"Failed to change password:\n{err.decode()}")
             else:
                 ad_msg = err.decode().strip() or out.decode().strip()
                 self.show_error(f"Failed to change password:\n{ad_msg}")
@@ -204,12 +212,14 @@ class PasswordChanger(Gtk.Window):
 
     def show_error(self, message):
         dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK, "Error")
+        self.apply_dark_css(dialog)
         dialog.format_secondary_text(message)
         dialog.run()
         dialog.destroy()
 
     def show_info(self, message):
         dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, "Success")
+        self.apply_dark_css(dialog)
         dialog.format_secondary_text(message)
         dialog.run()
         dialog.destroy()
