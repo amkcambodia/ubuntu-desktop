@@ -176,4 +176,9 @@ sudo ./map_drive/map_drive.sh
 
 # ----------------------------------------------------------------
 
+# 7. Configure auto register landscape.....
+sudo ./script/landscape_auto_register.sh
+
+# ----------------------------------------------------------------
+
 echo "✅ All configurations completed successfully."
