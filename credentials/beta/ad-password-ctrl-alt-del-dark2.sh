@@ -55,6 +55,13 @@ class PasswordChanger(Gtk.Window):
             background-color: #555555;
             box-shadow: 0 1px 3px rgba(255, 255, 255, 0.2);
         }
+        /* Dialog background and text color */
+        dialog {
+            background-color: #1e1e1e;
+        }
+        dialog label, dialog * {
+            color: #ffffff;
+        }
         """
         provider.load_from_data(css)
         Gtk.StyleContext.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
