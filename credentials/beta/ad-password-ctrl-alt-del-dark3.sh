@@ -72,22 +72,24 @@ class PasswordChanger(Gtk.Window):
         self.init_home_ui()
 
     def apply_dark_css(self, widget):
-        # Apply the same dark CSS to dialogs/windows
-        screen = Gdk.Screen.get_default()
-        provider = Gtk.CssProvider()
         css = b"""
-        window, dialog {
+        * {
             background-color: #1e1e1e;
             color: #ffffff;
         }
-        label, entry, button {
-            color: #ffffff;
-            background-color: #2a2a2a;
-        }
         """
+        provider = Gtk.CssProvider()
         provider.load_from_data(css)
-        Gtk.StyleContext.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-        widget.get_style_context().add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        context = widget.get_style_context()
+        context.add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+        # Apply also to internal content area (important!)
+        if isinstance(widget, Gtk.Dialog):
+            content_area = widget.get_content_area()
+            content_area.get_style_context().add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            for child in content_area.get_children():
+                child.get_style_context().add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
 
     def init_home_ui(self):
         self.clear_window()
