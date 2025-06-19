@@ -21,12 +21,13 @@ fi
 
 # ----------------------------------------------------------------------------------
 
-# if [ -f /etc/xdg/autostart/smbcred.desktop ]; then
-#     echo "🗑️ Deleting autostart file..."
-#     sudo rm -f /etc/xdg/autostart/smbcred.desktop
-# else
-#     echo "✅ Autostart file does not exist."
-# fi
+# Remove autostart smbcred
+if [ -f /etc/xdg/autostart/smbcred.desktop ]; then
+    echo "🗑️ Deleting autostart file..."
+    sudo rm -f /etc/xdg/autostart/smbcred.desktop
+else
+    echo "✅ autostart smbcred does not exist."
+fi
 
 # ----------------------------------------------------------------------------------
 
@@ -64,6 +65,15 @@ if [ -f /etc/profile.d/startup_wifi.sh ]; then
     sudo rm -f /etc/profile.d/startup_wifi.sh
 else
     echo "✅ Autostart WIFI does not exist."
+fi
+
+# ----------------------------------------------------------------------------------
+# Remove script Password change script
+if [ -f /etc/xdg/autostart/custom-shortcut.desktop ]; then
+    echo "🗑️ Deleting autostart WIFI..."
+    sudo rm -f /etc/xdg/autostart/custom-shortcut.desktop
+else
+    echo "✅ Password change script does not exist."
 fi
 
 # ----------------------------------------------------------------------------------

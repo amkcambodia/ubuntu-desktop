@@ -12,7 +12,7 @@ set -e
 
 # Run and install smbcred.sh
 sudo mkdir -p /bin/amk
-#sudo cp ./credentials/tasks/smbcred.sh /bin/amk/smbcred.sh
+#sudo cp ./credentials/tasks/smbcred3.sh /bin/amk/smbcred.sh
 sudo cp ./credentials/template/credential3.sh /bin/amk/smbcred.sh
 sudo chmod 755 /bin/amk/smbcred.sh
 sudo chmod +x /bin/amk/smbcred.sh
@@ -28,6 +28,22 @@ if [ -f "$AUTOSTART_FILE" ]; then
   echo "🗂️  Backing up existing $AUTOSTART_FILE..."
   sudo cp "$AUTOSTART_FILE" "$AUTOSTART_FILE.bk"
 fi
+
+# ----------------------------------------------------------------------------------
+
+# Copy new autostart file
+sudo cp ./credentials/tasks/autostart.sh "$AUTOSTART_FILE"
+sudo chmod 755 "$AUTOSTART_FILE"
+sudo chmod +x "$AUTOSTART_FILE"
+
+
+# ----------------------------------------------------------------------------------
+
+# Backup old scripts if they exist
+timestamp=$(date +%Y%m%d_%H%M)
+[ -f "/usr/lcoal/bin/amk/change_password.sh" ] && cp "/usr/lcoal/bin/amk/change_password.sh" "/usr/lcoal/bin/amk/change_password.sh.bak.$timestamp"
+[ -f "/usr/lcoal/bin/amk/custom-shortcuts.sh" ] && cp "/usr/lcoal/bin/amk/custom-shortcuts.sh" "/usr/lcoal/bin/amk/custom-shortcuts.sh.bak.$timestamp"
+[ -f "/etc/xdg/autostart/custom-shortcut.desktop" ] && cp "/etc/xdg/autostart/custom-shortcut.desktop" "/etc/xdg/autostart/custom-shortcut.desktop.bak.$timestamp"
 
 # ----------------------------------------------------------------------------------
 
@@ -50,13 +66,9 @@ sudo cp ./credentials/template/custom-shortcut.desktop /etc/xdg/autostart/custom
 sudo chmod 755 /etc/xdg/autostart/custom-shortcut.desktop
 sudo chmod +x /etc/xdg/autostart/custom-shortcut.desktop
 
-
 # ----------------------------------------------------------------------------------
 
-# Copy new autostart file
-sudo cp ./credentials/tasks/autostart.sh "$AUTOSTART_FILE"
-sudo chmod 755 "$AUTOSTART_FILE"
-sudo chmod +x "$AUTOSTART_FILE"
+
 
 # ----------------------------------------------------------------------------------
 
