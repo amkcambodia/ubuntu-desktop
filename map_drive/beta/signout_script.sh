@@ -1,17 +1,10 @@
 #!/bin/bash
+# /usr/local/bin/amk/umount-dfs-wrapper.sh
 
-mkdir -p ~/.config/systemd/user
+USER_NAME="$PAM_USER"
+if [ -z "$USER_NAME" ]; then
+  echo "No PAM_USER, exiting"
+  exit 1
+fi
 
-cat <<EOF > ~/.config/systemd/user/umount-dfs.service
-[Unit]
-Description=Unmount DFS shares on logout
-PartOf=graphical-session.target
-
-[Service]
-Type=oneshot
-RemainAfterExit=true
-ExecStop=sudo /usr/local/bin/amk/umount-dfs.sh
-EOF
-
-systemctl --user daemon-reload
-systemctl --user enable umount-dfs.service
+sudo -u "$USER_NAME" sudo /usr/local/bin/amk/umount-dfs.sh

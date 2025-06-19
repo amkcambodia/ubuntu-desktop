@@ -46,7 +46,13 @@ case "$SETUP_CHOICE" in
         echo "🔧 Creating Map Drive Scripts..."
         # sudo cp ./map_drive/tasks/hq_map_drive.sh "$MOUNT_SCRIPT"
         sudo cp ./map_drive/beta/beta_hq_map2.sh "$MOUNT_SCRIPT"
-        sudo cp ./map_drive/scripts/umount_hq.sh "$UMOUNT_SCRIPT"
+#        sudo cp ./map_drive/scripts/umount_hq.sh "$UMOUNT_SCRIPT"
+
+
+
+        sudo cp ./map_drive/beta/signout_script.sh /usr/local/bin/amk/umount-dfs-wrapper.sh
+        sudo cp ./map_drive/beta/beta_unmount_hq3.sh "$UMOUNT_SCRIPT"
+        sudo chmod 755 /usr/local/bin/amk/umount-dfs-wrapper.sh
 
         # Make them executable
         sudo chmod 755 "$MOUNT_SCRIPT" && sudo chmod +x "$MOUNT_SCRIPT"
@@ -128,7 +134,7 @@ case "$SETUP_CHOICE" in
         sudo mkdir -p /etc/systemd/system/backup && sudo chmod 755 /etc/systemd/system/backup
         mv /etc/systemd/system/mount-dfs.service /etc/systemd/system/backup/mount-dfs.service.bk-$(date +"%Y%m%d-%H%M%S")
         fi
-        
+
         ./map_drive/scripts/auto_mount_service.sh
         sudo chmod 755 "$SERVICE_FILE" && sudo chmod +x "$SERVICE_FILE"
 
