@@ -140,11 +140,11 @@ class PasswordChanger(Gtk.Window):
         for child in self.get_children():
             self.remove(child)
 
-    def validate_policy(self, password):
-        return (len(password) >= 8 and
-                re.search(r"[A-Z]", password) and
-                re.search(r"[a-z]", password) and
-                re.search(r"[0-9]", password))
+#    def validate_policy(self, password):
+#        return (len(password) >= 8 and
+#                re.search(r"[A-Z]", password) and
+#                re.search(r"[a-z]", password) and
+#                re.search(r"[0-9]", password))
 
     def on_lock_screen(self, button):
         try:
@@ -165,9 +165,9 @@ class PasswordChanger(Gtk.Window):
             self.show_error("New password and confirmation do not match.")
             return
 
-        if not self.validate_policy(new):
-            self.show_error("Your password does not meet the policy:\nMinimum 8 characters, including uppercase, lowercase, and number.")
-            return
+#        if not self.validate_policy(new):
+#            self.show_error("Your password does not meet the policy:\nMinimum 8 characters, including uppercase, lowercase, and number.")
+#            return
 
         try:
             subprocess.run(['kinit', self.user_principal], input=current.encode(), check=True, stderr=subprocess.PIPE)
@@ -185,8 +185,11 @@ class PasswordChanger(Gtk.Window):
 
             if cmd.returncode == 0:
                 self.show_info("The password has changed successfully.\nPlease logout and login again to take effect.")
-            else:
-                self.show_error(f"Failed to change password:\n{err.decode()}")
+#            else:
+#                self.show_error(f"Failed to change password:\n{err.decode()}")
+             else:
+                ad_msg = err.decode().strip() or out.decode().strip()
+                self.show_error(f"Failed to change password:\n{ad_msg}")
         except Exception as e:
             self.show_error(str(e))
         finally:
