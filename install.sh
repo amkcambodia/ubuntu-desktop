@@ -89,6 +89,11 @@ echo "✅ All required packages processed."
 #echo "📦 Installing dependencies from $REQUIREMENTS_FILE..."
 #pip3 install --user -r "$REQUIREMENTS_FILE"
 #echo "✅ Installation complete."
+# ----------------------------------------------------------------
+
+# 7. Configure auto register landscape.....
+sudo ./script/landscape_auto_register.sh
+
 
 ##################################################################
 # ------------------- Fresh Setup Starts Here -------------------
@@ -173,11 +178,6 @@ sudo ./network/setup_network_setting.sh
 
 # 6. Configure network drive.....
 sudo ./map_drive/map_drive.sh
-
-# ----------------------------------------------------------------
-
-# 7. Configure auto register landscape.....
-sudo ./script/landscape_auto_register.sh
 
 # ----------------------------------------------------------------
 

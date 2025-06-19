@@ -19,27 +19,27 @@ USER_ID=$(id -u "$USERNAME")
 GROUP_ID="root"
 CREDENTIALS_FILE="/etc/smbcred/$USERNAME"
 
-# # Only run if credentials file exists
-# if [ ! -f "$CREDENTIALS_FILE" ]; then
-#     echo "Credentials file not found for $USERNAME"
-#     exit 1
-# fi
+ # Only run if credentials file exists
+ if [ ! -f "$CREDENTIALS_FILE" ]; then
+     echo "Credentials file not found for $USERNAME"
+     exit 1
+ fi
 
-# If credentials file does not exist, run the creation script
-if [ ! -f "$CREDENTIALS_FILE" ]; then
-    echo "Credentials file not found for $USERNAME"
-    echo "Running smbcred.sh to create it..."
-    
-    /bin/amk/smbcred.sh "$USERNAME"
-
-    # Recheck if it was successfully created
-    if [ ! -f "$CREDENTIALS_FILE" ]; then
-        echo "❌ Failed to create credentials file."
-        exit 1
-    else
-        echo "✅ Credentials file created."
-    fi
-fi
+## If credentials file does not exist, run the creation script
+#if [ ! -f "$CREDENTIALS_FILE" ]; then
+#    echo "Credentials file not found for $USERNAME"
+#    echo "Running smbcred.sh to create it..."
+#
+#    /bin/amk/smbcred.sh "$USERNAME"
+#
+#    # Recheck if it was successfully created
+#    if [ ! -f "$CREDENTIALS_FILE" ]; then
+#        echo "❌ Failed to create credentials file."
+#        exit 1
+#    else
+#        echo "✅ Credentials file created."
+#    fi
+#fi
 
 #-------------------------------------------------------
 

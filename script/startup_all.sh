@@ -15,7 +15,7 @@ echo "=== $(date) Starting PAM setup ==="
 
 # 1. Run smbcred.sh first to make sure credentials are set
 #echo "[1/4] Running smbcred.sh..."
-/bin/bash /bin/amk/smbcred.sh
+#/bin/bash /bin/amk/smbcred.sh
 
 # ----------------------------------------------------------------
 
