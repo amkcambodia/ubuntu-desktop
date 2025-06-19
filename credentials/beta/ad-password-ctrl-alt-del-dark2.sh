@@ -187,7 +187,7 @@ class PasswordChanger(Gtk.Window):
                 self.show_info("The password has changed successfully.\nPlease logout and login again to take effect.")
 #            else:
 #                self.show_error(f"Failed to change password:\n{err.decode()}")
-             else:
+            else:
                 ad_msg = err.decode().strip() or out.decode().strip()
                 self.show_error(f"Failed to change password:\n{ad_msg}")
         except Exception as e:
