@@ -11,7 +11,7 @@ else
 fi
 
 # ----------------------------------------------------------------------------------
-
+# Remove credential script
 if grep -q '/bin/amk' <<< "$(ls -ld /bin/amk 2>/dev/null)"; then
     echo "🗑️ Deleting existing credential script..."
     sudo rm -rf /bin/amk
@@ -78,6 +78,15 @@ fi
 
 # ----------------------------------------------------------------------------------
 
+# Remove script
+if grep -q '/usr/local/bin/amk' <<< "$(ls -ld /usr/local/bin/amk 2>/dev/null)"; then
+    echo "🗑️ Deleting existing script..."
+    sudo rm -rf /usr/local/bin/amk
+else
+    echo "✅ Script does not exist."
+fi
+
+# ----------------------------------------------------------------------------------
 
 
 
