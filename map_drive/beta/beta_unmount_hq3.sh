@@ -7,7 +7,7 @@ MEDIA="/media/$USERNAME"
 for share in Collaboration-Q Department-N Home-H; do
     mountpoint="$MEDIA/$share"
     if mountpoint -q "$mountpoint"; then
-        umount -l "$mountpoint"
+        sudo umount -l "$mountpoint"
         echo "$(date) 🔌 Unmounted $mountpoint" >> /tmp/unmount-user-drives.log
     fi
 done
