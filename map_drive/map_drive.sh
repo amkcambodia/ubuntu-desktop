@@ -1,6 +1,10 @@
 #!/bin/bash
 
 set -e
+# -------------
+echo ""
+echo "🔧 Starting configure Map Drive..."
+echo ""
 
 # ------------- Pepare dependency --------------------
 echo ""
@@ -42,7 +46,7 @@ case "$SETUP_CHOICE" in
         echo "🔧 Creating Map Drive Scripts..."
         # sudo cp ./map_drive/tasks/hq_map_drive.sh "$MOUNT_SCRIPT"
         sudo cp ./map_drive/beta/beta_hq_map2.sh "$MOUNT_SCRIPT"
-        sudo cp ./map_drxlive/scripts/umount_hq.sh "$UMOUNT_SCRIPT"
+        sudo cp ./map_drive/scripts/umount_hq.sh "$UMOUNT_SCRIPT"
 
         # Make them executable
         sudo chmod 755 "$MOUNT_SCRIPT" && sudo chmod +x "$MOUNT_SCRIPT"

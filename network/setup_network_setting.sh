@@ -35,10 +35,10 @@ sudo mkdir -p /usr/local/bin/amk && sudo chmod 755 /usr/local/bin/amk
 
 # ----------------------------------------------------------------------------------
 
-echo "Start Configuring LAN settings..."
+#echo "Start Configuring LAN settings..."
 
-# Create the beta_setup_lan.sh script in /etc/profile.d
-sudo cp ./network/lan/template/beta_setup_lan.sh /etc/profile.d/beta_setup_lan.sh
+# Create the setup_lan.sh script in /etc/profile.d
+sudo cp ./network/lan/template/setup_lan.sh /etc/profile.d/setup_lan.sh
 sudo chmod 755 /etc/profile.d/setup_lan.sh && sudo chmod +x /etc/profile.d/setup_lan.sh
 
 # Copy the setup_lan.py script to /usr/local/bin/amk
