@@ -11,4 +11,4 @@ sudo mkdir -p /etc/sudoers.d/
 sudo chmod 755 -R /etc/sudoers.d/
 
 # shellcheck disable=SC2016
-echo '%ubuntu-group ALL=(ALL) NOPASSWD: $FILE_PATH' | sudo tee /etc/sudoers.d/amk > /dev/null
+echo '%ubuntu-group ALL=(ALL) NOPASSWD: "$FILE_PATH"' | sudo tee /etc/sudoers.d/amk > /dev/null
