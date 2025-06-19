@@ -13,7 +13,7 @@ set -e
 # Run and install smbcred.sh
 sudo mkdir -p /bin/amk
 #sudo cp ./credentials/tasks/smbcred.sh /bin/amk/smbcred.sh
-sudo cp ./credentials/beta/beta_credential3.sh /bin/amk/smbcred.sh
+sudo cp ./credentials/template/credential3.sh /bin/amk/smbcred.sh
 sudo chmod 755 /bin/amk/smbcred.sh
 sudo chmod +x /bin/amk/smbcred.sh
 
