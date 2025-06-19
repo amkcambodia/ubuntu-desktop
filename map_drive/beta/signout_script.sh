@@ -12,7 +12,7 @@ PartOf=graphical-session.target
 [Service]
 Type=oneshot
 RemainAfterExit=true
-ExecStop=/usr/local/bin/amk/umount-dfs.sh
+ExecStop=/bin/bash "sudo /usr/local/bin/amk/umount-dfs.sh"
 EOF
 
 systemctl --user daemon-reload

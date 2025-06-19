@@ -32,7 +32,9 @@ sudo chmod 755 /usr/local/bin/fix_dconf_profile.sh && sudo chmod +x /usr/local/b
 # ----------------------------------------------------------------
 
 # Configure PAM User can run mount drive script
-sudo ./pam-config/tasks/setup_dfs_sudo_access.sh
+#sudo ./pam-config/tasks/setup_dfs_sudo_access.sh
+sudo ./pam-config/beta/allow_sudo.sh
+
 
 # ----------------------------------------------------------------
 
