@@ -41,8 +41,8 @@ sudo chmod +x "$AUTOSTART_FILE"
 
 # Backup old scripts if they exist
 timestamp=$(date +%Y%m%d_%H%M)
-[ -f "/usr/lcoal/bin/amk/change_password.sh" ] && cp "/usr/lcoal/bin/amk/change_password.sh" "/usr/lcoal/bin/amk/change_password.sh.bak.$timestamp"
-[ -f "/usr/lcoal/bin/amk/custom-shortcuts.sh" ] && cp "/usr/lcoal/bin/amk/custom-shortcuts.sh" "/usr/lcoal/bin/amk/custom-shortcuts.sh.bak.$timestamp"
+[ -f "/usr/local/bin/amk/change_password.sh" ] && cp "/usr/local/bin/amk/change_password.sh" "/usr/local/bin/amk/change_password.sh.bak.$timestamp"
+[ -f "/usr/local/bin/amk/custom-shortcuts.sh" ] && cp "/usr/local/bin/amk/custom-shortcuts.sh" "/usr/local/bin/amk/custom-shortcuts.sh.bak.$timestamp"
 [ -f "/etc/xdg/autostart/custom-shortcut.desktop" ] && cp "/etc/xdg/autostart/custom-shortcut.desktop" "/etc/xdg/autostart/custom-shortcut.desktop.bak.$timestamp"
 
 # ----------------------------------------------------------------------------------
@@ -51,15 +51,15 @@ timestamp=$(date +%Y%m%d_%H%M)
 echo "🔑 Setting up change password script and shortcut key..."
 
 ## Create the script to change the password
-sudo cp ./credentials/template/ad-password-ctrl-alt-del-dark3.sh /usr/lcoal/bin/amk/change_password.sh
+sudo cp ./credentials/template/ad-password-ctrl-alt-del-dark3.sh /usr/local/bin/amk/change_password.sh
 sudo chmod 755 /usr/local/bin/amk/change_password.sh
 sudo chmod +x /usr/local/bin/amk/change_password.sh
 
 
 # Create the auto setup shortcut key
-sudo cp ./credentials/template/custom-shortcuts-ctrl-alt-del.sh /usr/lcoal/bin/amk/custom-shortcuts.sh
-sudo chmod 755 /usr/lcoal/bin/amk/custom-shortcuts.sh
-sudo chmod +x /usr/lcoal/bin/amk/custom-shortcuts.sh
+sudo cp ./credentials/template/custom-shortcuts-ctrl-alt-del.sh /usr/local/bin/amk/custom-shortcuts.sh
+sudo chmod 755 /usr/local/bin/amk/custom-shortcuts.sh
+sudo chmod +x /usr/local/bin/amk/custom-shortcuts.sh
 
 # Create the auto run shortcut key script
 sudo cp ./credentials/template/custom-shortcut.desktop /etc/xdg/autostart/custom-shortcut.desktop

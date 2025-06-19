@@ -80,7 +80,7 @@ fi
 
 # Remove script
 if grep -q '/usr/local/bin/amk' <<< "$(ls -ld /usr/local/bin/amk 2>/dev/null)"; then
-    echo "🗑️ Deleting existing script..."
+    echo "🗑️ Deleting existing script in /usr/local/bin/amk..."
     sudo rm -rf /usr/local/bin/amk
 else
     echo "✅ Script does not exist."
