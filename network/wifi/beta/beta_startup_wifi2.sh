@@ -1,4 +1,4 @@
-mkdir -p ~/.config/autostart
+#!/bin/bash
 
 cat <<EOF > /etc/xdg/autostart/startup-wifi.desktop
 [Desktop Entry]
