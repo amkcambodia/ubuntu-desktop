@@ -24,4 +24,4 @@ if command -v gsettings >/dev/null 2>&1 && command -v dconf >/dev/null 2>&1; the
     dconf write "${CUSTOM_KEYBIND_PATH}binding" "'<Control><Alt>Delete'"
 fi
 
-#
+# Disable the default Ctrl+Alt+Delete logout dialog
