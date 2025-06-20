@@ -23,3 +23,5 @@ if command -v gsettings >/dev/null 2>&1 && command -v dconf >/dev/null 2>&1; the
     dconf write "${CUSTOM_KEYBIND_PATH}command" "'/usr/local/bin/amk/change_password.sh'"
     dconf write "${CUSTOM_KEYBIND_PATH}binding" "'<Control><Alt>Delete'"
 fi
+
+#
