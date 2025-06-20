@@ -1,72 +1,149 @@
 #!/bin/bash
 
-# This script installs system dependencies from a requirements file.
-set -e
+CURRENT_USER=$(logname)
 
-# ----------------------------------------------------------------------------------
+# Skip unwanted users
+if [[ "$CURRENT_USER" == "root" || "$CURRENT_USER" == "sam" ]]; then
+  exit 0
+fi
 
-# Configure LAN configurations
+(
+  sleep 10
 
-sudo tee /etc/polkit-1/rules.d/50-networkmanager-ubuntu-group.rules > /dev/null <<EOF
-polkit.addRule(function(action, subject) {
-    if (action.id == "org.freedesktop.NetworkManager.settings.modify.system" &&
-        subject.isInGroup("ubuntu-group")) {
-        return polkit.Result.YES;
-    }
-});
-EOF
+  LOG_FILE="/tmp/amk_wifi_${CURRENT_USER}.log"
+  echo "[$(date)] Starting Wi-Fi setup for $CURRENT_USER" > "$LOG_FILE"
 
-sudo systemctl restart polkit
+  TARGET_SSID="AMKBr"
+  REALM="AMKCAMBODIA.COM"
+  IFACE=$(nmcli -t device status | grep ':wifi:' | cut -d: -f1)
 
-# ----------------------------------------------------------------------------------
+  if [[ -z "$IFACE" ]]; then
+    echo "❌ No Wi-Fi interface found." >> "$LOG_FILE"
+    exit 1
+  fi
 
-echo "Start Configuring LAN settings..."
+  CRED_FILE="/etc/smbcred/$CURRENT_USER"
+  CA_CERT="/etc/ssl/certs/amkcambodia-AMKDC02-CA.pem"
 
-# Create necessary directories and set permissions
-sudo mkdir -p /usr/local/bin/amk && sudo chmod 755 /usr/local/bin/amk
+  export DISPLAY=:0
+  export XAUTHORITY="/home/$CURRENT_USER/.Xauthority"
 
-# ----------------------------------------------------------------------------------
+  # Prompt for missing credentials
+  if [[ ! -f "$CRED_FILE" ]]; then
+    echo "⚠️ No credential file. Prompting..." >> "$LOG_FILE"
 
-## Rename the LAN configuration script to setup_credentials.sh
+    AD_USER=$(zenity --entry --title="Wi-Fi Login" --text="Enter your AD Username:")
+    AD_PASS=$(zenity --password --title="Wi-Fi Login" --text="Enter your AD Password:")
 
-#sudo ./network/lan/tasks/rename_lan.sh
+    if [[ -z "$AD_USER" || -z "$AD_PASS" ]]; then
+      zenity --error --text="Missing credentials. Cannot continue."
+      exit 1
+    fi
 
-#python3 ./network/lan/tasks/rename_network.py
+    DOMAIN="amkcambodia.com"
+    echo "username=\"$AD_USER\"" > "$CRED_FILE"
+    echo "password=\"$AD_PASS\"" >> "$CRED_FILE"
+    echo "domain=\"$DOMAIN\"" >> "$CRED_FILE"
 
-# ----------------------------------------------------------------------------------
+    chmod 600 "$CRED_FILE"
+    chown root:root "$CRED_FILE"
+  fi
 
-#echo "Start Configuring LAN settings..."
+  source "$CRED_FILE"
 
-# Create the setup_lan.sh script in /etc/profile.d
-sudo cp ./network/lan/template/setup_lan.sh /etc/profile.d/setup_lan.sh
-sudo chmod 755 /etc/profile.d/setup_lan.sh && sudo chmod +x /etc/profile.d/setup_lan.sh
+  if [[ -z "$username" || -z "$password" ]]; then
+    echo "❌ Missing values in credential file." >> "$LOG_FILE"
+    exit 1
+  fi
 
-# Copy the setup_lan.py script to /usr/local/bin/amk
-# sudo cp ./network/lan/template/setup_lan.py /usr/local/bin/amk/setup_lan.py
-# sudo chmod 755 /etc/profile.d/beta_setup_lan.sh && sudo chmod +x /etc/profile.d/beta_setup_lan.sh
-# sudo chmod 755 /usr/local/bin/amk/setup_lan.py && chmod 755 /usr/local/bin/amk/setup_lan.py
+  # Try temporary Wi-Fi test connection to AMKBr
+  TEST_CON_NAME="test-${TARGET_SSID}-${CURRENT_USER}"
 
-#sudo cp ./network/lan/template/lan_config.sh /usr/local/bin/amk/setup_lan.sh
-sudo cp ./network/lan/beta/beta_setup_lan.sh /usr/local/bin/amk/setup_lan.sh
-sudo chmod 755 /usr/local/bin/amk/setup_lan.sh && sudo chmod +x /usr/local/bin/amk/setup_lan.sh
+  echo "🔍 Checking if SSID '$TARGET_SSID' is available..." >> "$LOG_FILE"
+  if ! nmcli dev wifi list | grep -q "$TARGET_SSID"; then
+    echo "📡 SSID $TARGET_SSID not found. Skipping." >> "$LOG_FILE"
+    exit 0
+  fi
 
-# ----------------------------------------------------------------------------------
+  # Clean up old test connection if it exists
+  if nmcli connection show "$TEST_CON_NAME" &>/dev/null; then
+    nmcli connection delete "$TEST_CON_NAME"
+  fi
 
-# Configure Wi-Fi settings
-echo "Start Configuring WIFI settings..."
+  # Try test connection to AMKBr with password
+  echo "🔌 Attempting test connection to $TARGET_SSID" >> "$LOG_FILE"
+  nmcli connection add type wifi ifname "$IFACE" con-name "$TEST_CON_NAME" ssid "$TARGET_SSID" \
+    wifi-sec.key-mgmt wpa-eap \
+    802-1x.eap peap \
+    802-1x.identity "$username@$REALM" \
+    802-1x.password "$password" \
+    802-1x.phase2-auth mschapv2 \
+    802-1x.ca-cert "$CA_CERT" \
+    802-1x.system-ca-certs yes \
+    connection.autoconnect no
 
-## Create the wifi directory if it doesn't exist
-#sudo cp ./network/wifi/template/wifi-setting.sh /usr/local/bin/amk/wifi-setting.sh
+  nmcli connection up "$TEST_CON_NAME" >> "$LOG_FILE" 2>&1
+  sleep 5
+  nmcli connection down "$TEST_CON_NAME"
+  nmcli connection delete "$TEST_CON_NAME"
 
-sudo cp ./network/wifi/beta/beta_wifi_setting.sh /usr/local/bin/amk/wifi-setting.sh
-sudo chmod 755 /usr/local/bin/amk/wifi-setting.sh && sudo chmod +x /usr/local/bin/amk/wifi-setting.sh
+  # Now test with kinit
+  echo "$password" | kinit "$username@$REALM" 2> /tmp/kinit_error.log
+  if [ $? -ne 0 ]; then
+    ERROR_MSG=$(cat /tmp/kinit_error.log)
+    echo "⚠️ Authentication failed: $ERROR_MSG" >> "$LOG_FILE"
 
+    if echo "$ERROR_MSG" | grep -qi "Password has expired"; then
+      zenity --info --title="Password Expired" --text="Your AD password has expired.\nPlease reset it now."
+      sudo -u "$CURRENT_USER" kpasswd "$username@$REALM"
+      NEW_PASS=$(zenity --password --title="New Password" --text="Enter your new password:")
 
-# Auto start with profile
-sudo cp ./network/wifi/template/startup_wifi.sh /etc/profile.d/startup_wifi.sh
-sudo chmod 755 /etc/profile.d/startup_wifi.sh && sudo chmod +x /etc/profile.d/startup_wifi.sh
+      if [[ -z "$NEW_PASS" ]]; then
+        zenity --error --text="Password reset cancelled."
+        exit 1
+      fi
 
-# ----------------------------------------------------------------------------------
+      echo "$NEW_PASS" | kinit "$username@$REALM"
+      if [ $? -ne 0 ]; then
+        zenity --error --text="New password is incorrect."
+        exit 1
+      fi
 
-# Set permissions for the wifi-setting.sh script
-sudo systemctl daemon-reload
+      sed -i "s/^password=.*/password=\"$NEW_PASS\"/" "$CRED_FILE"
+      password="$NEW_PASS"
+      echo "✅ Password updated." >> "$LOG_FILE"
+    else
+      zenity --error --text="Authentication failed:\n$ERROR_MSG"
+      exit 1
+    fi
+  else
+    echo "✅ Authentication test successful." >> "$LOG_FILE"
+  fi
+
+  # Prepare full identity string
+  IDENTITY="${domain}\\${username}"
+  USER_CON_NAME="${TARGET_SSID}-${CURRENT_USER}"
+
+  # Create or update main Wi-Fi profile
+  if ! nmcli --terse --fields NAME connection show | grep -Fxq "$USER_CON_NAME"; then
+    echo "🔧 Creating Wi-Fi profile: $USER_CON_NAME" >> "$LOG_FILE"
+    nmcli connection add type wifi ifname "$IFACE" con-name "$USER_CON_NAME" ssid "$TARGET_SSID" \
+      wifi-sec.key-mgmt wpa-eap \
+      802-1x.eap peap \
+      802-1x.identity "$IDENTITY" \
+      802-1x.password "$password" \
+      802-1x.phase2-auth mschapv2 \
+      802-1x.ca-cert "$CA_CERT" \
+      802-1x.system-ca-certs yes \
+      wifi-sec.group ccmp \
+      connection.autoconnect yes \
+      connection.permissions "$CURRENT_USER"
+  else
+    echo "🔄 Updating Wi-Fi profile: $USER_CON_NAME" >> "$LOG_FILE"
+    nmcli connection modify "$USER_CON_NAME" \
+      802-1x.identity "$IDENTITY" \
+      802-1x.password "$password"
+  fi
+
+  echo "✅ Wi-Fi setup complete." >> "$LOG_FILE"
+) &
