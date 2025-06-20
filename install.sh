@@ -92,7 +92,7 @@ echo "✅ All required packages processed."
 # ----------------------------------------------------------------
 
 # 7. Configure auto register landscape.....
-sudo ./script/landscape_auto_register.sh
+#sudo ./script/landscape_auto_register.sh
 
 
 ##################################################################
