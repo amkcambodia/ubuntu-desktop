@@ -124,3 +124,5 @@
   echo "✅ Wi-Fi profile '$USER_CON_NAME' configured for user '$USERNAME'." >> "$LOG_FILE"
 
 ) &
+
+# ----
