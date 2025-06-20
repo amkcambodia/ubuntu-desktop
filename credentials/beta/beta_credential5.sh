@@ -2,20 +2,29 @@
 
 # === Detect GUI user and session ===
 
-# Get the first non-root user from loginctl (should be the GUI user)
 USERNAME=$(loginctl list-users | awk '$1 ~ /^[0-9]+$/ && $2 != "root" { print $2; exit }')
 if [ -z "$USERNAME" ]; then
     echo "❌ No non-root user logged in."
     exit 1
 fi
 
-# Get the user's UID
 USER_ID=$(id -u "$USERNAME")
 
-# Get DISPLAY from the user's running processes (e.g., gnome-session)
-USER_DISPLAY=$(ps -u "$USER_ID" -o args= | grep -oP 'DISPLAY=\K[^ ]+' | head -n1)
-# Get DBUS session from gnome-session environment
-USER_DBUS=$(grep -z DBUS_SESSION_BUS_ADDRESS /proc/$(pgrep -u "$USERNAME" gnome-session | head -n1)/environ | sed -E 's/.*DBUS_SESSION_BUS_ADDRESS=([^ ]+).*/\1/')
+get_env_var() {
+    local var_name=$1
+    local pid
+    for pid in $(pgrep -u "$USER_ID"); do
+        local val=$(tr '\0' '\n' < /proc/$pid/environ 2>/dev/null | grep "^$var_name=" | cut -d= -f2-)
+        if [ -n "$val" ]; then
+            echo "$val"
+            return 0
+        fi
+    done
+    return 1
+}
+
+USER_DISPLAY=$(get_env_var DISPLAY)
+USER_DBUS=$(get_env_var DBUS_SESSION_BUS_ADDRESS)
 
 if [ -z "$USER_DISPLAY" ] || [ -z "$USER_DBUS" ]; then
     echo "❌ Failed to detect GUI session environment for $USERNAME."
@@ -39,7 +48,6 @@ done
 
 # === Functions ===
 
-# Check if credentials file is expired
 is_cred_expired() {
     if [ ! -e "$cred_file" ]; then
         return 0
@@ -50,7 +58,6 @@ is_cred_expired() {
     [ "$age" -ge "$cred_age_days" ]
 }
 
-# Validate credentials using smbclient
 are_credentials_valid() {
     smbclient "$test_share" -A "$cred_file" -c "exit" &>/dev/null
     return $?
@@ -68,7 +75,7 @@ if [ -f "$cred_file" ]; then
     . "$cred_file"
 fi
 
-# === Determine if we need to prompt the user ===
+# === Prompt user if needed ===
 if [ ! -s "$cred_file" ] || ! grep -q "password=" "$cred_file" || is_cred_expired || ! are_credentials_valid; then
     domain=$(sudo -u "$USERNAME" DISPLAY="$USER_DISPLAY" DBUS_SESSION_BUS_ADDRESS="$USER_DBUS" zenity --entry --title="Login" --text="Enter domain:" --entry-text="${domain:-}")
     username=$(sudo -u "$USERNAME" DISPLAY="$USER_DISPLAY" DBUS_SESSION_BUS_ADDRESS="$USER_DBUS" zenity --entry --title="Login" --text="Enter username:" --entry-text="${username:-}")
