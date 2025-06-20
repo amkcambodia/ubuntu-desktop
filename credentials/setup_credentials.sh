@@ -57,7 +57,7 @@ sudo chmod +x /usr/local/bin/amk/change_password.sh
 
 
 # Create the auto setup shortcut key
-sudo cp ./credentials/template/custom-shortcuts-ctrl-alt-del.sh /usr/local/bin/amk/custom-shortcuts.sh
+sudo cp ./credentials/template/custom-shortcuts-ctrl-alt-del2.sh /usr/local/bin/amk/custom-shortcuts.sh
 sudo chmod 755 /usr/local/bin/amk/custom-shortcuts.sh
 sudo chmod +x /usr/local/bin/amk/custom-shortcuts.sh
 
