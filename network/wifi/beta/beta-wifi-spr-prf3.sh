@@ -14,7 +14,7 @@ fi
   echo "[$(date)] Starting Wi-Fi setup" > "$LOG_FILE"
 
   TARGET_SSID="AMKBr"
-  REALM="CAMBODIA.COM"  # UPPERCASE DOMAIN
+  REALM="AMKCAMBODIA.COM"  # UPPERCASE DOMAIN
   IFACE=$(nmcli -t device status | grep ':wifi:' | cut -d: -f1)
 
   if [[ -z "$IFACE" ]]; then
@@ -41,7 +41,7 @@ fi
       exit 1
     fi
 
-    DOMAIN="yourdomain"  # lowercase NetBIOS or leave empty
+    DOMAIN="amkcambodia.com"  # lowercase NetBIOS or leave empty
     echo "username=\"$AD_USER\"" > "$CRED_FILE"
     echo "password=\"$AD_PASS\"" >> "$CRED_FILE"
     echo "domain=\"$DOMAIN\"" >> "$CRED_FILE"
