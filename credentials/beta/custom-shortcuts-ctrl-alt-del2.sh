@@ -6,6 +6,9 @@ export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
 if command -v gsettings >/dev/null 2>&1 && command -v dconf >/dev/null 2>&1; then
     echo "🔧 Setting custom keybinding..."
 
+    # 🧹 Disable the default Ctrl+Alt+Delete logout dialog
+    gsettings set org.gnome.settings-daemon.plugins.media-keys logout ''
+
     CUSTOM_KEYBIND_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
 
     existing=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings 2>/dev/null)
