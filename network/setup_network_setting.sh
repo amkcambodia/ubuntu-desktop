@@ -15,6 +15,7 @@ fi
 
   TARGET_SSID="AMKBr"
   REALM="AMKCAMBODIA.COM"
+  DOMAIN="amkcambodia.com"
   IFACE=$(nmcli -t device status | grep ':wifi:' | cut -d: -f1)
 
   if [[ -z "$IFACE" ]]; then
@@ -22,9 +23,22 @@ fi
     exit 1
   fi
 
+  # Rescan for available Wi-Fi networks
+  echo "🔍 Scanning for Wi-Fi networks..." >> "$LOG_FILE"
+  nmcli dev wifi rescan
+  sleep 2
+
+  if ! nmcli dev wifi list | grep -q "$TARGET_SSID"; then
+    echo "📡 SSID '$TARGET_SSID' not found. Skipping authentication." >> "$LOG_FILE"
+    exit 0
+  fi
+
+  echo "✅ SSID '$TARGET_SSID' found. Proceeding with authentication test..." >> "$LOG_FILE"
+
   CRED_FILE="/etc/smbcred/$CURRENT_USER"
   CA_CERT="/etc/ssl/certs/amkcambodia-AMKDC02-CA.pem"
 
+  # Prepare GUI environment
   export DISPLAY=:0
   export XAUTHORITY="/home/$CURRENT_USER/.Xauthority"
 
@@ -40,7 +54,6 @@ fi
       exit 1
     fi
 
-    DOMAIN="amkcambodia.com"
     echo "username=\"$AD_USER\"" > "$CRED_FILE"
     echo "password=\"$AD_PASS\"" >> "$CRED_FILE"
     echo "domain=\"$DOMAIN\"" >> "$CRED_FILE"
@@ -56,21 +69,16 @@ fi
     exit 1
   fi
 
-  # Try temporary Wi-Fi test connection to AMKBr
+  # Build identity
+  IDENTITY="${domain}\\${username}"
   TEST_CON_NAME="test-${TARGET_SSID}-${CURRENT_USER}"
 
-  echo "🔍 Checking if SSID '$TARGET_SSID' is available..." >> "$LOG_FILE"
-  if ! nmcli dev wifi list | grep -q "$TARGET_SSID"; then
-    echo "📡 SSID $TARGET_SSID not found. Skipping." >> "$LOG_FILE"
-    exit 0
-  fi
-
-  # Clean up old test connection if it exists
+  # Clean up any old temp profile
   if nmcli connection show "$TEST_CON_NAME" &>/dev/null; then
     nmcli connection delete "$TEST_CON_NAME"
   fi
 
-  # Try test connection to AMKBr with password
+  # Try temporary connection to test auth
   echo "🔌 Attempting test connection to $TARGET_SSID" >> "$LOG_FILE"
   nmcli connection add type wifi ifname "$IFACE" con-name "$TEST_CON_NAME" ssid "$TARGET_SSID" \
     wifi-sec.key-mgmt wpa-eap \
@@ -87,7 +95,7 @@ fi
   nmcli connection down "$TEST_CON_NAME"
   nmcli connection delete "$TEST_CON_NAME"
 
-  # Now test with kinit
+  # kinit to verify password or expiration
   echo "$password" | kinit "$username@$REALM" 2> /tmp/kinit_error.log
   if [ $? -ne 0 ]; then
     ERROR_MSG=$(cat /tmp/kinit_error.log)
@@ -117,14 +125,12 @@ fi
       exit 1
     fi
   else
-    echo "✅ Authentication test successful." >> "$LOG_FILE"
+    echo "✅ Authentication success with kinit." >> "$LOG_FILE"
   fi
 
-  # Prepare full identity string
-  IDENTITY="${domain}\\${username}"
+  # Create or update full Wi-Fi profile
   USER_CON_NAME="${TARGET_SSID}-${CURRENT_USER}"
 
-  # Create or update main Wi-Fi profile
   if ! nmcli --terse --fields NAME connection show | grep -Fxq "$USER_CON_NAME"; then
     echo "🔧 Creating Wi-Fi profile: $USER_CON_NAME" >> "$LOG_FILE"
     nmcli connection add type wifi ifname "$IFACE" con-name "$USER_CON_NAME" ssid "$TARGET_SSID" \
@@ -145,5 +151,6 @@ fi
       802-1x.password "$password"
   fi
 
-  echo "✅ Wi-Fi setup complete." >> "$LOG_FILE"
+  echo "✅ Wi-Fi setup completed for $CURRENT_USER." >> "$LOG_FILE"
+
 ) &
