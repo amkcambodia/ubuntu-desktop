@@ -37,6 +37,7 @@ sudo chmod +x /bin/amk/smbcred.sh
 #sudo chmod +x "$AUTOSTART_FILE"
 
 
+
 # ----------------------------------------------------------------------------------
 
 # Backup old scripts if they exist
