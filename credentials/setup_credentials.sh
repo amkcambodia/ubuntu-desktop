@@ -19,22 +19,22 @@ sudo chmod +x /bin/amk/smbcred.sh
 
 # ----------------------------------------------------------------------------------
 
-# Configure autostart for smbcred
-AUTOSTART_FILE="/etc/xdg/autostart/smbcred.desktop"
-echo "🚀 Setting up autostart for smbcred..."
-
-# Backup existing autostart file if it exists
-if [ -f "$AUTOSTART_FILE" ]; then
-  echo "🗂️  Backing up existing $AUTOSTART_FILE..."
-  sudo cp "$AUTOSTART_FILE" "$AUTOSTART_FILE.bk"
-fi
+## Configure autostart for smbcred
+#AUTOSTART_FILE="/etc/xdg/autostart/smbcred.desktop"
+#echo "🚀 Setting up autostart for smbcred..."
+#
+## Backup existing autostart file if it exists
+#if [ -f "$AUTOSTART_FILE" ]; then
+#  echo "🗂️  Backing up existing $AUTOSTART_FILE..."
+#  sudo cp "$AUTOSTART_FILE" "$AUTOSTART_FILE.bk"
+#fi
 
 # ----------------------------------------------------------------------------------
 
-# Copy new autostart file
-sudo cp ./credentials/tasks/autostart.sh "$AUTOSTART_FILE"
-sudo chmod 755 "$AUTOSTART_FILE"
-sudo chmod +x "$AUTOSTART_FILE"
+## Copy new autostart file
+#sudo cp ./credentials/tasks/autostart.sh "$AUTOSTART_FILE"
+#sudo chmod 755 "$AUTOSTART_FILE"
+#sudo chmod +x "$AUTOSTART_FILE"
 
 
 # ----------------------------------------------------------------------------------
