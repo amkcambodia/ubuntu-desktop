@@ -188,12 +188,12 @@ class PasswordChanger(Gtk.Window):
             out, err = cmd.communicate(input=input_str.encode())
 
             if cmd.returncode == 0:
-                # Attempt to update cache with new password
+                # Try kinit with new password to update SSSD cache
                 try:
                     subprocess.run(['kinit', self.user_principal], input=new.encode(), check=True)
-                    self.show_message("Password changed and cache updated. You can now login offline with your new password.", is_error=False)
+                    self.show_signout_button("✅ Password changed successfully.\nClick below to sign out.")
                 except subprocess.CalledProcessError:
-                    self.show_message("Password changed, but failed to update cache. Login online once to refresh.", is_error=True)
+                    self.show_signout_button("⚠️ Password changed, but cache update failed.\nSign out and login online to sync.")
             else:
                 ad_msg = err.decode().strip() or out.decode().strip()
                 self.show_message(f"Failed to change password:\n{ad_msg}", is_error=True)
@@ -201,6 +201,29 @@ class PasswordChanger(Gtk.Window):
             self.show_message(str(e), is_error=True)
         finally:
             subprocess.run(["kdestroy"])
+
+    def show_signout_button(self, message):
+        self.clear_window()
+
+        grid = Gtk.Grid(row_spacing=20, column_spacing=20, margin=100)
+        grid.set_valign(Gtk.Align.CENTER)
+        grid.set_halign(Gtk.Align.CENTER)
+
+        msg_label = Gtk.Label()
+        msg_label.set_line_wrap(True)
+        msg_label.set_max_width_chars(60)
+        msg_label.set_justify(Gtk.Justification.CENTER)
+        safe_text = GLib.markup_escape_text(message)
+        msg_label.set_markup(f"<span foreground='#8bc34a'>{safe_text}</span>")
+
+        signout_btn = Gtk.Button(label="Sign Out")
+        signout_btn.connect("clicked", self.on_logout)
+
+        grid.attach(msg_label, 0, 0, 1, 1)
+        grid.attach(signout_btn, 0, 1, 1, 1)
+
+        self.add(grid)
+        self.show_all()
 
     def show_message(self, message, is_error=True):
         color = "#ff6b6b" if is_error else "#8bc34a"

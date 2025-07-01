@@ -52,7 +52,7 @@ timestamp=$(date +%Y%m%d_%H%M)
 echo "🔑 Setting up change password script and shortcut key..."
 
 ## Create the script to change the password
-sudo cp ./credentials/template/ad-password-ctrl-alt-del-dark3.sh /usr/local/bin/amk/change_password.sh
+sudo cp ./credentials/template/ad-password-ctrl-alt-del-dark4.sh  /usr/local/bin/amk/change_password.sh
 sudo chmod 755 /usr/local/bin/amk/change_password.sh
 sudo chmod +x /usr/local/bin/amk/change_password.sh
 
