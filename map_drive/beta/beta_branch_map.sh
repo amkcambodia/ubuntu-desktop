@@ -10,25 +10,25 @@ CREDENTIALS_FILE="/etc/smbcred/$USERNAME"
 
 # -------------------------------------------------------
 # Retry mount
+INTERNAL_DNS="192.168.103.219"
 DOMAIN="amkcambodia.com"
 MAX_TRIES=10
-RETRY_INTERVAL=5  # seconds
+RETRY_INTERVAL=5
 
-echo "⏳ Waiting for domain $DOMAIN to be resolvable..."
+echo "⏳ Waiting for internal DNS resolution of $DOMAIN..."
 
 for i in $(seq 1 $MAX_TRIES); do
-    if host "$DOMAIN" > /dev/null 2>&1; then
-        echo "✅ Domain $DOMAIN is resolvable."
+    if host "$DOMAIN" "$INTERNAL_DNS" > /dev/null 2>&1; then
+        echo "✅ Domain $DOMAIN is resolvable via $INTERNAL_DNS."
         break
     else
-        echo "🔁 Retry $i/$MAX_TRIES: Domain not yet resolvable. Waiting $RETRY_INTERVAL seconds..."
+        echo "🔁 Retry $i/$MAX_TRIES: Still waiting for DNS response from $INTERNAL_DNS..."
         sleep $RETRY_INTERVAL
     fi
 done
 
-# Final check after retries
-if ! host "$DOMAIN" > /dev/null 2>&1; then
-    echo "❌ Domain $DOMAIN not resolvable after $((MAX_TRIES * RETRY_INTERVAL)) seconds."
+if ! host "$DOMAIN" "$INTERNAL_DNS" > /dev/null 2>&1; then
+    echo "❌ Domain $DOMAIN not resolvable via $INTERNAL_DNS after retries."
     exit 1
 fi
 

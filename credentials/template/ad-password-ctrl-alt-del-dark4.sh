@@ -7,7 +7,6 @@ import subprocess
 import signal
 import sys
 
-
 class PasswordChanger(Gtk.Window):
     def __init__(self):
         super().__init__(title="Change Password")
