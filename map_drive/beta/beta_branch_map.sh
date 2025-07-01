@@ -36,8 +36,8 @@ fi
 ## SMB Shared Server
 
 SERVER="amkcambodia.com"
-SERVER1="amkcrm1"
-SERVER2="ho-databackup"
+SERVER1="amkcrm1.amkcambodia.com"
+SERVER2="ho-databackup.amkcambodia.com"
 DFS_ROOT="amkdfs"
 
 # DFS sub-paths
@@ -80,7 +80,7 @@ else
 fi
 
 ### Mount Branch_Post_Report-P
-echo "🔗 Attempting to mount Home-H..."
+
 if mount.cifs "//$SERVER2/$BPR_PREFIXPATH" "$BPR_MOUNTPOINT" \
   -o credentials="$CREDENTIALS_FILE",sec=ntlmssp,uid="$USER_ID",gid="$GROUP_ID",vers=3.0,user; then
     echo "✅ Home-H mounted at $BPR_MOUNTPOINT"

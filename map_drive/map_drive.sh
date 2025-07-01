@@ -117,6 +117,7 @@ case "$SETUP_CHOICE" in
         echo "🔧 Creating mount and unmount scripts..."
         sudo cp ./map_drive/beta/beta_branch_map.sh "$MOUNT_SCRIPT"
         sudo cp ./map_drive/scripts/umount_branch.sh "$UMOUNT_SCRIPT"
+        sudo chmod 755 /media
 
         # Make them executable
         sudo chmod 755 "$MOUNT_SCRIPT" && sudo chmod +x "$MOUNT_SCRIPT"
@@ -165,6 +166,7 @@ case "$SETUP_CHOICE" in
         if [ ! -d /media ]; then
             echo "📁 Creating /media directory..."
             sudo mkdir -p /media
+            sudo chmod 755 /media
         else
             echo "📂 /media already exists."
         fi
