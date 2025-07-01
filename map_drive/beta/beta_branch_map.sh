@@ -9,42 +9,28 @@ GROUP_ID="root"
 CREDENTIALS_FILE="/etc/smbcred/$USERNAME"
 
 # -------------------------------------------------------
+# Retry mount
+DOMAIN="amkcambodia.com"
 MAX_TRIES=10
+RETRY_INTERVAL=5  # seconds
 
 echo "⏳ Waiting for domain $DOMAIN to be resolvable..."
+
 for i in $(seq 1 $MAX_TRIES); do
     if host "$DOMAIN" > /dev/null 2>&1; then
         echo "✅ Domain $DOMAIN is resolvable."
         break
     else
-        echo "🔁 Waiting for domain resolution... ($i/$MAX_TRIES)"
-        sleep 1
+        echo "🔁 Retry $i/$MAX_TRIES: Domain not yet resolvable. Waiting $RETRY_INTERVAL seconds..."
+        sleep $RETRY_INTERVAL
     fi
 done
 
-# If still not resolvable after MAX_TRIES, exit
+# Final check after retries
 if ! host "$DOMAIN" > /dev/null 2>&1; then
-    echo "❌ Domain $DOMAIN not resolvable after $MAX_TRIES attempts."
+    echo "❌ Domain $DOMAIN not resolvable after $((MAX_TRIES * RETRY_INTERVAL)) seconds."
     exit 1
 fi
-
-# -------------------------------------------------------
-
-# If credentials file does not exist, run the creation script
-#if [ ! -f "$CREDENTIALS_FILE" ]; then
-#    echo "Credentials file not found for $USERNAME"
-#    echo "Running smbcred.sh to create it..."
-#
-#    /bin/amk/smbcred.sh "$USERNAME"
-#
-#    # Recheck if it was successfully created
-#    if [ ! -f "$CREDENTIALS_FILE" ]; then
-#        echo "❌ Failed to create credentials file."
-#        exit 1
-#    else
-#        echo "✅ Credentials file created."
-#    fi
-#fi
 
 #-------------------------------------------------------
 ## SMB Shared Server
@@ -75,23 +61,6 @@ chown "$USERNAME:$GROUP_ID" "$MEDIA" "$COLLAB_MOUNTPOINT" "$CUD_MOUNTPOINT" "$BP
 chmod 700 "$MEDIA" "$COLLAB_MOUNTPOINT" "$CUD_MOUNTPOINT" "$BPR_MOUNTPOINT"
 
 #-------------------------------------------------------
-### -------------------
-
-# mount -t cifs "//$SERVER/\$BRANCHS_COLLAB_SHARE_PATH" "\$COLLAB_MOUNTPOINT" \\
-#   -o credentials=$CREDENTIALS_FILE,sec=ntlmssp,uid=\$(id -u),gid=\$(id -g),vers=3.0
-
-# mount -t cifs "//$SERVER1/\$BRANCHS_CUD_SHARE_PATH" "\$CUD_MOUNTPOINT" \\
-#   -o credentials=$CREDENTIALS_FILE,sec=ntlmssp,uid=\$(id -u),gid=\$(id -g),vers=3.0
-
-# mount -t cifs "//$SERVER2/\$BRANCHS_BPR_SHARE_PATH" "\$BPR_MOUNTPOINT" \\
-#   -o credentials=$CREDENTIALS_FILE,sec=ntlmssp,uid=\$(id -u),gid=\$(id -g),vers=3.0
-
-# mountpoint -q "\$COLLAB_MOUNTPOINT" && echo "✅ Collaboration mounted at \$COLLAB_MOUNTPOINT" || echo "❌ Collaboration mount failed"
-# mountpoint -q "\$CUD_MOUNTPOINT" && echo "✅ CUD mounted at \$CUD_MOUNTPOINT" || echo "❌ CUD mount failed"
-# mountpoint -q "\$BPR_MOUNTPOINT" && echo "✅ Branch Post Report mounted at \$BPR_MOUNTPOINT" || echo "❌ Branch Post Report mount failed"
-
-#-------------------------------------------------------
-
 # Mount using user context (no sudo)
 
 ### Mount Collaboration-Q
