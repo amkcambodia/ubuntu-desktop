@@ -64,7 +64,7 @@ echo "Start Configuring WIFI settings..."
 
 # Create the directory for Wi-Fi credentials with profile wifi permission
 
-sudo cp ./network/wifi/beta/beta_wifi_auth_full.sh /usr/local/bin/amk/wifi-setting.sh
+sudo cp ./network/wifi/beta/beta_wifi_auth_full2.sh /usr/local/bin/amk/wifi-setting.sh
 sudo chmod 755 /usr/local/bin/amk/wifi-setting.sh && sudo chmod +x /usr/local/bin/amk/wifi-setting.sh
 
 
