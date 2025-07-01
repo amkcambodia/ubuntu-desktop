@@ -45,10 +45,11 @@ COLLAB_PREFIXPATH="Collaboration-Q"
 CUD_PREFIXPATH="CUD-U"
 BPR_PREFIXPATH="Branch"
 
+MEDIA="/media/$USERNAME"
 COLLAB_MOUNTPOINT="/media/$USERNAME/Collaboration-Q"
 CUD_MOUNTPOINT="/media/$USERNAME/CUD-U"
 BPR_MOUNTPOINT="/media/$USERNAME/Branch_Post_Report-P"
-MEDIA="/media/$USERNAME"
+
 
 #-------------------------------------------------------
 
@@ -83,7 +84,7 @@ fi
 
 if mount.cifs "//$SERVER2/$BPR_PREFIXPATH" "$BPR_MOUNTPOINT" \
   -o credentials="$CREDENTIALS_FILE",sec=ntlmssp,uid="$USER_ID",gid="$GROUP_ID",vers=3.0,user; then
-    echo "✅ Home-H mounted at $BPR_MOUNTPOINT"
+    echo "✅ Branch_Post_Report-P mounted at $BPR_MOUNTPOINT"
 else
     echo "❌ Failed to $BPR_MOUNTPOINT"
 fi
