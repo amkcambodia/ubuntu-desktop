@@ -8,27 +8,43 @@ USER_ID=$(id -u "$USERNAME")
 GROUP_ID="root"
 CREDENTIALS_FILE="/etc/smbcred/$USERNAME"
 
-# # Only run if credentials file exists
-# if [ ! -f "$CREDENTIALS_FILE" ]; then
-#     echo "Credentials file not found for $USERNAME"
-#     exit 1
-# fi
+# -------------------------------------------------------
+MAX_TRIES=10
+
+echo "⏳ Waiting for domain $DOMAIN to be resolvable..."
+for i in $(seq 1 $MAX_TRIES); do
+    if host "$DOMAIN" > /dev/null 2>&1; then
+        echo "✅ Domain $DOMAIN is resolvable."
+        break
+    else
+        echo "🔁 Waiting for domain resolution... ($i/$MAX_TRIES)"
+        sleep 1
+    fi
+done
+
+# If still not resolvable after MAX_TRIES, exit
+if ! host "$DOMAIN" > /dev/null 2>&1; then
+    echo "❌ Domain $DOMAIN not resolvable after $MAX_TRIES attempts."
+    exit 1
+fi
+
+# -------------------------------------------------------
 
 # If credentials file does not exist, run the creation script
-if [ ! -f "$CREDENTIALS_FILE" ]; then
-    echo "Credentials file not found for $USERNAME"
-    echo "Running smbcred.sh to create it..."
-    
-    /bin/amk/smbcred.sh "$USERNAME"
-
-    # Recheck if it was successfully created
-    if [ ! -f "$CREDENTIALS_FILE" ]; then
-        echo "❌ Failed to create credentials file."
-        exit 1
-    else
-        echo "✅ Credentials file created."
-    fi
-fi
+#if [ ! -f "$CREDENTIALS_FILE" ]; then
+#    echo "Credentials file not found for $USERNAME"
+#    echo "Running smbcred.sh to create it..."
+#
+#    /bin/amk/smbcred.sh "$USERNAME"
+#
+#    # Recheck if it was successfully created
+#    if [ ! -f "$CREDENTIALS_FILE" ]; then
+#        echo "❌ Failed to create credentials file."
+#        exit 1
+#    else
+#        echo "✅ Credentials file created."
+#    fi
+#fi
 
 #-------------------------------------------------------
 ## SMB Shared Server
@@ -56,7 +72,7 @@ mkdir -p  "$MEDIA" "$COLLAB_MOUNTPOINT" "$CUD_MOUNTPOINT" "$BPR_MOUNTPOINT"
 
 chown "$USERNAME:$GROUP_ID" "$MEDIA" "$COLLAB_MOUNTPOINT" "$CUD_MOUNTPOINT" "$BPR_MOUNTPOINT"
 
-chmod 700 "$MEDIA" "$MEDIA" "$COLLAB_MOUNTPOINT" "$CUD_MOUNTPOINT" "$BPR_MOUNTPOINT"
+chmod 700 "$MEDIA" "$COLLAB_MOUNTPOINT" "$CUD_MOUNTPOINT" "$BPR_MOUNTPOINT"
 
 #-------------------------------------------------------
 ### -------------------

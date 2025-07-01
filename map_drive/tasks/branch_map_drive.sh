@@ -3,7 +3,7 @@ USERNAME="$(whoami)"
 SERVER="amkcambodia.com"
 SERVER1="amkcrm1"
 SERVER2="ho-databackup"
-CREDENTIALS_FILE="$HOME/.smbcred"
+CREDENTIALS_FILE="/etc/smbcred/$USERNAME"
 
 BRANCHS_COLLAB_SHARE_PATH="amkdfs/Collaboration/"
 BRANCHS_CUD_SHARE_PATH="CUD"

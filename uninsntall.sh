@@ -48,6 +48,15 @@ else
 fi
 
 # ----------------------------------------------------------------------------------
+if grep -q '/etc/systemd/system/backup' <<< "$(ls -ld /etc/systemd/system/backup 2>/dev/null)"; then
+    echo "🗑️ Deleting backup service..."
+    sudo rm -rf /etc/systemd/system/backup
+else
+    echo "✅ Backup service does not exist."
+fi
+
+
+# ----------------------------------------------------------------------------------
 
 # Remove script startup network LAN
 if [ -f /etc/profile.d/setup_lan.sh ]; then

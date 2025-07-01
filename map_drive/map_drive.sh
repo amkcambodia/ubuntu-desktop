@@ -115,7 +115,7 @@ case "$SETUP_CHOICE" in
         # Copy new scripts
         echo ""
         echo "🔧 Creating mount and unmount scripts..."
-        sudo cp ./map_drive/tasks/branch_map_drive.sh "$MOUNT_SCRIPT"
+        sudo cp ./map_drive/beta/beta_branch_map.sh "$MOUNT_SCRIPT"
         sudo cp ./map_drive/scripts/umount_branch.sh "$UMOUNT_SCRIPT"
 
         # Make them executable
@@ -142,12 +142,6 @@ case "$SETUP_CHOICE" in
         sudo systemctl daemon-reload
         sudo systemctl enable mount-dfs.service
 
-        echo ""
-        echo "✅ Mount and unmount scripts created at /usr/local/bin/amk"
-        echo "✅ Systemd service created: mount-dfs.service"
-        echo "👉 Run:   sudo systemctl start mount-dfs.service"
-        echo "👉 Run:   sudo systemctl status mount-dfs.service"
-        echo "👉 Stop:  sudo systemctl stop mount-dfs.service"
         ;;
     3)
         echo "🛠️  Custom Setup selected."
