@@ -67,6 +67,10 @@ echo "Start Configuring WIFI settings..."
 sudo cp ./network/wifi/beta/beta_wifi_auth_full2.sh /usr/local/bin/amk/wifi-setting.sh
 sudo chmod 755 /usr/local/bin/amk/wifi-setting.sh && sudo chmod +x /usr/local/bin/amk/wifi-setting.sh
 
+# Inspect the script to ensure password expire change
+sudo cp ./network/wifi/beta/change_ad_password.exp /usr/local/bin/amk/change_ad_password.exp
+sudo chmod 755 /usr/local/bin/amk/change_ad_password.exp && sudo chmod +x /usr/local/bin/amk/change_ad_password.exp
+
 
 # Auto start Wi-Fi script on login
 #sudo cp ./network/wifi/template/startup_wifi.sh /etc/xdg/automate/startup_wifi.sh
