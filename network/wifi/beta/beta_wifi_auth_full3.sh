@@ -14,7 +14,6 @@ fi
   echo "[$(date)] Starting AMKBr Wi-Fi setup for $CURRENT_USER" > "$LOG_FILE"
 
   TARGET_SSID="Staff"
-  REALM="AMKCAMBODIA.COM"
   DOMAIN="amkcambodia.com"
   IFACE=$(nmcli -t device status | grep ':wifi:' | cut -d: -f1)
   CRED_FILE="/etc/smbcred/$CURRENT_USER"
@@ -79,45 +78,12 @@ fi
 
   # 5. Attempt to connect
   echo "▶️ Connecting to $PROFILE_NAME..." >> "$LOG_FILE"
-  nmcli connection up "$PROFILE_NAME" >> "$LOG_FILE" 2>&1
-
-  # 6. Run kinit to check password
-  echo "$password" | kinit "$username@$REALM" 2> /tmp/kinit_error.log
-  if [ $? -ne 0 ]; then
-    ERROR_MSG=$(cat /tmp/kinit_error.log)
-    echo "⚠️ kinit failed: $ERROR_MSG" >> "$LOG_FILE"
-
-    if echo "$ERROR_MSG" | grep -qi "Password has expired"; then
-      zenity --info --text="Your AD password has expired.\nPlease enter a new password."
-
-      NEW_PASS=$(zenity --password --title="New Password" --text="Enter your new password:")
-      if [[ -z "$NEW_PASS" ]]; then
-        zenity --error --text="Password reset canceled."
-        exit 1
-      fi
-
-      /usr/local/bin/amk/change_ad_password.exp "$username@$REALM" "$password" "$NEW_PASS" >> "$LOG_FILE" 2>&1
-
-      echo "$NEW_PASS" | kinit "$username@$REALM" 2> /tmp/kinit_error_new.log
-      if [ $? -ne 0 ]; then
-        zenity --error --text="New password failed.\n$(cat /tmp/kinit_error_new.log)"
-        exit 1
-      fi
-
-      sed -i "s/^password=.*/password=\"$NEW_PASS\"/" "$CRED_FILE"
-      password="$NEW_PASS"
-      echo "✅ Password updated." >> "$LOG_FILE"
-
-      echo "🔁 Reconnecting with new password..." >> "$LOG_FILE"
-      nmcli connection modify "$PROFILE_NAME" \
-        802-1x.password "$password"
-      nmcli connection up "$PROFILE_NAME" >> "$LOG_FILE" 2>&1
-    else
-      zenity --error --text="Authentication failed:\n$ERROR_MSG"
-      exit 1
-    fi
-  else
-    echo "✅ kinit succeeded. Wi-Fi should be active." >> "$LOG_FILE"
+  if ! nmcli connection up "$PROFILE_NAME" >> "$LOG_FILE" 2>&1; then
+    echo "❌ Wi-Fi connection failed." >> "$LOG_FILE"
+    zenity --error --title="Wi-Fi Error" --text="Connection to Wi-Fi '$TARGET_SSID' failed.\nPlease check your password."
+    exit 1
   fi
+
+  echo "✅ Wi-Fi connection successful." >> "$LOG_FILE"
 
 ) &

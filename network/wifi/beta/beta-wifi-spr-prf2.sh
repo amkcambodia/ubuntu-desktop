@@ -8,7 +8,7 @@
   LOG_FILE="/tmp/amk_wifi_$(logname).log"
   echo "[$(date)] Starting Wi-Fi setup" > "$LOG_FILE"
 
-  TARGET_SSID="AMKBr"
+  TARGET_SSID="Staff"
   IFACE=$(nmcli -t device status | grep ':wifi:' | cut -d: -f1)
 
   if [[ -z "$IFACE" ]]; then

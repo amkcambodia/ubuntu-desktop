@@ -13,7 +13,7 @@ fi
   LOG_FILE="/tmp/amk_wifi_${CURRENT_USER}.log"
   echo "[$(date)] Starting Wi-Fi setup for $CURRENT_USER" > "$LOG_FILE"
 
-  TARGET_SSID="AMKBr"
+  TARGET_SSID="Staff"
   REALM="AMKCAMBODIA.COM"
   DOMAIN="amkcambodia.com"
   IFACE=$(nmcli -t device status | grep ':wifi:' | cut -d: -f1)
