@@ -35,6 +35,7 @@ sudo mkdir -p /usr/local/bin/amk && sudo chmod 755 /usr/local/bin/amk
 
 # ----------------------------------------------------------------------------------
 
+
 #echo "Start Configuring LAN settings..."
 
 # Create the setup_lan.sh script in /etc/profile.d
